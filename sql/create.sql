@@ -5,8 +5,8 @@
 
 CREATE TABLE utilisateur (
     id SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    prenom VARCHAR(100) NOT NULL,
+    nom VARCHAR(128) NOT NULL,
+    prenom VARCHAR(128) NOT NULL,
     date_naissance DATE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     address TEXT,
@@ -16,7 +16,7 @@ CREATE TABLE utilisateur (
 
 CREATE TABLE profil (
     id SERIAL PRIMARY KEY,
-    nom VARCHAR(10) NOT NULL,
+    nom VARCHAR(128) NOT NULL,
     quota_max INTEGER NOT NULL CHECK (quota_max >= 1),
     duree_max_pret INTEGER
 );
@@ -27,7 +27,7 @@ CREATE TABLE profil (
 
 CREATE TABLE adherent (
     id INTEGER PRIMARY KEY,
-    numero_adherent VARCHAR(20) UNIQUE NOT NULL,
+    numero_adherent VARCHAR(120) UNIQUE NOT NULL,
     date_inscription TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     profil_id INTEGER NOT NULL,
     CONSTRAINT fk_adherent_utilisateur FOREIGN KEY (id) REFERENCES utilisateur(id),
@@ -37,8 +37,8 @@ CREATE TABLE adherent (
 CREATE TABLE personnel (
     id INTEGER PRIMARY KEY,
     date_embauche TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    matricule VARCHAR(20) UNIQUE NOT NULL,
-    status VARCHAR(50) NOT NULL CHECK (status IN ('Bibliothécaire', 'Administrateur')),
+    matricule VARCHAR(120) UNIQUE NOT NULL,
+    status VARCHAR(120) NOT NULL CHECK (status IN ('Bibliothécaire', 'Administrateur')),
     CONSTRAINT fk_personnel_utilisateur FOREIGN KEY (id) REFERENCES utilisateur(id)
 );
 
@@ -65,7 +65,7 @@ CREATE TABLE editeur (
 CREATE TABLE livre (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(255) NOT NULL,
-    isbn VARCHAR(20) UNIQUE,
+    isbn VARCHAR(120) UNIQUE,
     annee_publication INTEGER,
     nombre_pages INTEGER,
     editeur_id INTEGER,
@@ -90,7 +90,7 @@ CREATE TABLE livre_categorie (
 
 CREATE TABLE exemplaire (
     id SERIAL PRIMARY KEY,
-    reference VARCHAR(50) UNIQUE NOT NULL,
+    reference VARCHAR(150) UNIQUE NOT NULL,
     date_acquisition DATE,
     livre_id INTEGER NOT NULL,
     CONSTRAINT fk_exemplaire_livre FOREIGN KEY (livre_id) REFERENCES livre(id)
