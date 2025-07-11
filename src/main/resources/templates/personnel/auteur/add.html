@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="personnel/layout :: content">
+<head>
+    <title>Ajouter Auteur</title>
+</head>
+<body>
+    <h2>Ajouter un auteur</h2>
+    <form th:action="@{/personnel/auteur/add}" method="post" class="row g-3">
+        <div class="col-md-6">
+            <label for="nom" class="form-label">Nom</label>
+            <input type="text" class="form-control" id="nom" name="nom" required>
+        </div>
+        <div class="col-md-6">
+            <label for="prenom" class="form-label">Prénom</label>
+            <input type="text" class="form-control" id="prenom" name="prenom">
+        </div>
+        <div class="col-md-6">
+            <label for="dateNaissance" class="form-label">Date de naissance</label>
+            <input type="date" class="form-control" id="dateNaissance" name="dateNaissance">
+        </div>
+        <div class="col-md-6">
+            <label for="dateDeces" class="form-label">Date de décès</label>
+            <input type="date" class="form-control" id="dateDeces" name="dateDeces">
+        </div>
+        <div class="col-md-6">
+            <label for="nationalite" class="form-label">Nationalité</label>
+            <input type="text" class="form-control" id="nationalite" name="nationalite">
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+        </div>
+    </form>
+</body>
+</html> 

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="personnel/layout :: content">
+<head>
+    <title>Ajouter Exemplaire</title>
+</head>
+<body>
+    <h2>Ajouter un exemplaire</h2>
+    <form th:action="@{/personnel/exemplaire/add}" method="post" class="row g-3">
+        <div class="col-md-6">
+            <label for="reference" class="form-label">Référence</label>
+            <input type="text" class="form-control" id="reference" name="reference" required>
+        </div>
+        <div class="col-md-6">
+            <label for="dateAcquisition" class="form-label">Date d'acquisition</label>
+            <input type="date" class="form-control" id="dateAcquisition" name="dateAcquisition">
+        </div>
+        <div class="col-md-6">
+            <label for="livre" class="form-label">Livre</label>
+            <select class="form-select" id="livre" name="livreId" th:each="livre : ${livres}" th:value="${livre.id}" th:text="${livre.titre}"></select>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+        </div>
+    </form>
+</body>
+</html> 

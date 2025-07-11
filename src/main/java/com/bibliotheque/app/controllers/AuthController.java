@@ -24,10 +24,22 @@ public class AuthController {
     @Autowired
     private PersonnelRepository personnelRepository;
 
-    @GetMapping("/login")
+    @GetMapping("/")
     public String loginPage() {
         return "login";
     }
+
+    @GetMapping("/adherent/home")
+    public String adherentHome() {
+        return "adherent/home";
+    }
+
+    @GetMapping("/personnel/home")
+    public String personnelHome() {
+        return "personnel/home";
+    }
+    
+    
 
     @PostMapping("/login")
     public String login(@RequestParam String email, @RequestParam String password, Model model, HttpSession session) {
@@ -62,6 +74,6 @@ public class AuthController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        return "redirect:/";
     }
 } 

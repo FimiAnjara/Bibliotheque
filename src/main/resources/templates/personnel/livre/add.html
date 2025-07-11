@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="personnel/layout :: content">
+<head>
+    <title>Ajouter Livre</title>
+</head>
+<body>
+    <h2>Ajouter un livre</h2>
+    <form th:action="@{/personnel/livre/add}" method="post" class="row g-3">
+        <div class="col-md-6">
+            <label for="titre" class="form-label">Titre</label>
+            <input type="text" class="form-control" id="titre" name="titre" required>
+        </div>
+        <div class="col-md-6">
+            <label for="isbn" class="form-label">ISBN</label>
+            <input type="text" class="form-control" id="isbn" name="isbn">
+        </div>
+        <div class="col-md-4">
+            <label for="anneePublication" class="form-label">Année de publication</label>
+            <input type="number" class="form-control" id="anneePublication" name="anneePublication">
+        </div>
+        <div class="col-md-4">
+            <label for="nombrePages" class="form-label">Nombre de pages</label>
+            <input type="number" class="form-control" id="nombrePages" name="nombrePages">
+        </div>
+        <div class="col-md-4">
+            <label for="editeur" class="form-label">Éditeur</label>
+            <select class="form-select" id="editeur" name="editeurId" th:each="editeur : ${editeurs}" th:value="${editeur.id}" th:text="${editeur.nom}"></select>
+        </div>
+        <div class="col-md-4">
+            <label for="auteur" class="form-label">Auteur</label>
+            <select class="form-select" id="auteur" name="auteurId" th:each="auteur : ${auteurs}" th:value="${auteur.id}" th:text="${auteur.nom}"></select>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+        </div>
+    </form>
+</body>
+</html> 
