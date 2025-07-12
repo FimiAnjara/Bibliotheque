@@ -12,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 
@@ -35,11 +37,10 @@ public class AuthController {
     }
 
     @GetMapping("/personnel/home")
-    public String personnelHome() {
+    public String home(Model model) {
+        model.addAttribute("activePage", "home");
         return "personnel/home";
     }
-    
-    
 
     @PostMapping("/login")
     public String login(@RequestParam String email, @RequestParam String password, Model model, HttpSession session) {
@@ -60,14 +61,14 @@ public class AuthController {
                     return "redirect:/personnel/home";
                 }
                 model.addAttribute("error", "Aucun profil associé à cet utilisateur.");
-                return "login";
+                return "redirect:/";
             } else {
                 model.addAttribute("error", "Mot de passe incorrect.");
-                return "login";
+                return "redirect:/";
             }
         } else {
             model.addAttribute("error", "Email inconnu.");
-            return "login";
+            return "redirect:/";
         }
     }
 
@@ -76,4 +77,4 @@ public class AuthController {
         session.invalidate();
         return "redirect:/";
     }
-} 
+}

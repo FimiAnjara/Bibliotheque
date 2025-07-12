@@ -20,3 +20,68 @@ INSERT INTO adherent (id, numero_adherent, date_inscription, profil_id) VALUES
 -- Personnel (lié à l'utilisateur 4)
 INSERT INTO personnel (id, date_embauche, matricule, status) VALUES
   (4, '2020-05-15 08:00:00', 'P001', 'Bibliothécaire');
+
+
+INSERT INTO auteur (nom, prenom, date_naissance, date_deces, nationalite) VALUES
+('Rowling', 'J.K.', '1965-07-31', NULL, 'Britannique'),
+('Martin', 'George R.R.', '1948-09-20', NULL, 'Américain'),
+('Tolkien', 'J.R.R.', '1892-01-03', '1973-09-02', 'Britannique'),
+('Orwell', 'George', '1903-06-25', '1950-01-21', 'Britannique'),
+('Hugo', 'Victor', '1802-02-26', '1885-05-22', 'Français'),
+('Christie', 'Agatha', '1890-09-15', '1976-01-12', 'Britannique'),
+('Austen', 'Jane', '1775-12-16', '1817-07-18', 'Britannique'),
+('Dumas', 'Alexandre', '1802-07-24', '1870-12-05', 'Français'),
+('Zola', 'Émile', '1840-04-02', '1902-09-29', 'Français'),
+('Verne', 'Jules', '1828-02-08', '1905-03-24', 'Français');
+
+INSERT INTO editeur (nom, pays, annee_fondation) VALUES
+('Gallimard', 'France', 1911),
+('Hachette', 'France', 1826),
+('Flammarion', 'France', 1876),
+('Éditions du Seuil', 'France', 1935),
+('Penguin Books', 'Royaume-Uni', 1935),
+('HarperCollins', 'États-Unis', 1989),
+('Bloomsbury', 'Royaume-Uni', 1986),
+('Bantam Books', 'États-Unis', 1945),
+('Allen & Unwin', 'Australie', 1936),
+('Éditions Robert Laffont', 'France', 1941);
+
+INSERT INTO categorie (nom) VALUES
+('Fantasy'),
+('Science-Fiction'),
+('Policier'),
+('Romance'),
+('Historique'),
+('Biographie'),
+('Aventure'),
+('Horreur'),
+('Thriller'),
+('Classique');
+
+INSERT INTO livre (titre, isbn, annee_publication, nombre_pages, limit_age, editeur_id, auteur_id, resume) VALUES
+('Harry Potter à l''école des sorciers', '9782070643028', 1997, 320, 10, 1, 1, 'Un jeune sorcier découvre son héritage magique et entre à Poudlard.'),
+('Le Trône de Fer', '9782253147531', 1996, 694, 16, 2, 2, 'Dans un monde médiéval fantastique, des familles nobles se disputent le pouvoir.'),
+('Le Seigneur des Anneaux', '9782266282361', 1954, 1216, 12, 3, 3, 'Une quête épique pour détruire un anneau maléfique.'),
+('1984', '9782070368228', 1949, 328, 16, 1, 4, 'Une dystopie sur un régime totalitaire omniprésent.'),
+('Les Misérables', '9782253004889', 1862, 1488, 12, 4, 5, 'L''histoire de Jean Valjean, un ancien forçat en quête de rédemption.'),
+('Orgueil et Préjugés', '9782253006333', 1813, 432, 12, 6, 7, 'L''histoire d''amour entre Elizabeth Bennet et Mr. Darcy.');
+
+INSERT INTO exemplaire (reference, date_acquisition, livre_id) VALUES
+-- 3 exemplaires de Harry Potter
+('HP1-001', '2020-01-15', 1),
+('HP1-002', '2020-01-15', 1),
+('HP1-003', '2021-03-10', 1),
+-- 2 exemplaires du Trône de Fer
+('TDF1-001', '2019-11-20', 2),
+('TDF1-002', '2020-05-12', 2),
+-- 2 exemplaires du Seigneur des Anneaux
+('SDA1-001', '2018-09-05', 3),
+('SDA1-002', '2020-02-28', 3),
+-- 1 exemplaire de 1984
+('1984-001', '2021-01-10', 4),
+-- 2 exemplaires des Misérables
+('LM1-001', '2017-06-18', 5),
+('LM1-002', '2020-04-22', 5),
+-- 1 exemplaire d'Orgueil et Préjugés
+('OP1-001', '2020-07-14', 6);
+

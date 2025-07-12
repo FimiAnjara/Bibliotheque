@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Fragment pour la sidebar du personnel -->
+    <div th:fragment="personnel-sidebar">
+        <nav class="sidebar d-flex flex-column p-3">
+            <div class="sidebar-heading mb-4">Menu Personnel</div>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/personnel/home}"
+                       th:classappend="${activePage == 'home'} ? 'active'">
+                        <i class="fas fa-home me-2"></i>Accueil
+                    </a>
+                </li>
+                
+                <!-- Sous-menu Auteurs -->
+                <li class="nav-item">
+                    <div class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#auteurSubmenu" 
+                         th:classappend="${activePage == 'auteur'} ? 'active'">
+                        <i class="fas fa-user-edit me-2"></i>Auteurs
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </div>
+                    <div class="collapse" id="auteurSubmenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/auteur/add}"
+                                   th:classappend="${activeSubPage == 'auteur-add'} ? 'active'">
+                                    <i class="fas fa-plus me-2"></i>Ajouter
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/auteur/list}"
+                                   th:classappend="${activeSubPage == 'auteur-list'} ? 'active'">
+                                    <i class="fas fa-list me-2"></i>Liste
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Sous-menu Livres -->
+                <li class="nav-item">
+                    <div class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#livreSubmenu"
+                         th:classappend="${activePage == 'livre'} ? 'active'">
+                        <i class="fas fa-book me-2"></i>Livres
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </div>
+                    <div class="collapse" id="livreSubmenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/livre/add}"
+                                   th:classappend="${activeSubPage == 'livre-add'} ? 'active'">
+                                    <i class="fas fa-plus me-2"></i>Ajouter
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/livre/list}"
+                                   th:classappend="${activeSubPage == 'livre-list'} ? 'active'">
+                                    <i class="fas fa-list me-2"></i>Liste
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Sous-menu Éditeurs -->
+                <li class="nav-item">
+                    <div class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#editeurSubmenu"
+                         th:classappend="${activePage == 'editeur'} ? 'active'">
+                        <i class="fas fa-building me-2"></i>Éditeurs
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </div>
+                    <div class="collapse" id="editeurSubmenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/editeur/add}"
+                                   th:classappend="${activeSubPage == 'editeur-add'} ? 'active'">
+                                    <i class="fas fa-plus me-2"></i>Ajouter
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/editeur/list}"
+                                   th:classappend="${activeSubPage == 'editeur-list'} ? 'active'">
+                                    <i class="fas fa-list me-2"></i>Liste
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Sous-menu Exemplaires -->
+                <li class="nav-item">
+                    <div class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#exemplaireSubmenu"
+                         th:classappend="${activePage == 'exemplaire'} ? 'active'">
+                        <i class="fas fa-copy me-2"></i>Exemplaires
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </div>
+                    <div class="collapse" id="exemplaireSubmenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/exemplaire/add}"
+                                   th:classappend="${activeSubPage == 'exemplaire-add'} ? 'active'">
+                                    <i class="fas fa-plus me-2"></i>Ajouter
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/exemplaire/list}"
+                                   th:classappend="${activeSubPage == 'exemplaire-list'} ? 'active'">
+                                    <i class="fas fa-list me-2"></i>Liste
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Sous-menu Catégories -->
+                <li class="nav-item">
+                    <div class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#categorieSubmenu"
+                         th:classappend="${activePage == 'categorie'} ? 'active'">
+                        <i class="fas fa-tags me-2"></i>Catégories
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </div>
+                    <div class="collapse" id="categorieSubmenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/categorie/add}"
+                                   th:classappend="${activeSubPage == 'categorie-add'} ? 'active'">
+                                    <i class="fas fa-plus me-2"></i>Ajouter
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link submenu-link" th:href="@{/personnel/categorie/list}"
+                                   th:classappend="${activeSubPage == 'categorie-list'} ? 'active'">
+                                    <i class="fas fa-list me-2"></i>Liste
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item mt-3">
+                    <a class="nav-link text-danger" th:href="@{/logout}">
+                        <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>

@@ -2,7 +2,10 @@ package com.bibliotheque.app.models.bibliographie;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -17,6 +20,8 @@ public class Livre {
     private String isbn;
     private Integer anneePublication;
     private Integer nombrePages;
+    private Integer limitAge;
+    private String resume;
 
     @ManyToOne
     @JoinColumn(name = "editeur_id")
@@ -29,6 +34,11 @@ public class Livre {
     @OneToMany(mappedBy = "livre")
     private List<Exemplaire> exemplaires;
 
-    @OneToMany(mappedBy = "livre")
-    private List<LivreCategorie> livreCategories;
+    @ManyToMany
+    @JoinTable(
+        name = "livre_categorie",
+        joinColumns = @JoinColumn(name = "livre_id"),
+        inverseJoinColumns = @JoinColumn(name = "categorie_id")
+    )
+    private Set<Categorie> categories = new HashSet<>();
 } 
