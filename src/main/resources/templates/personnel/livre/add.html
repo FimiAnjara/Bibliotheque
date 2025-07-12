@@ -1,38 +1,111 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="personnel/layout :: content">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Ajouter Livre</title>
+    <!-- CSS (Bootstrap + Font Awesome) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/personnel.css}">
 </head>
 <body>
-    <h2>Ajouter un livre</h2>
-    <form th:action="@{/personnel/livre/add}" method="post" class="row g-3">
-        <div class="col-md-6">
-            <label for="titre" class="form-label">Titre</label>
-            <input type="text" class="form-control" id="titre" name="titre" required>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+             <div class="col-md-3 col-lg-2 p-0">
+               <div th:insert="~{fragments/personnel-sidebar :: personnel-sidebar}"></div>
+            </div>
+            
+            <!-- Contenu principal -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Simple Header avec Logo -->
+                <div class="simple-header fade-in">
+                    <div class="logo">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div>
+                        <h1>Ajouter un Livre</h1>
+                        <p class="mb-0">Gestion des livres</p>
+                    </div>
+                </div>
+
+                <!-- Alertes -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Formulaire -->
+                <div class="content-wrapper fade-in">
+                    <form th:action="@{/personnel/livre/add}" method="post" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="titre" class="form-label">Titre</label>
+                            <input type="text" class="form-control" id="titre" name="titre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn" name="isbn" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="auteurId" class="form-label">Auteur</label>
+                            <select class="form-select" id="auteurId" name="auteurId" required>
+                                <option value="">Sélectionner un auteur</option>
+                                <option th:each="auteur : ${auteurs}" 
+                                        th:value="${auteur.id}" 
+                                        th:text="${auteur.nom + ' ' + auteur.prenom}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editeurId" class="form-label">Éditeur</label>
+                            <select class="form-select" id="editeurId" name="editeurId" required>
+                                <option value="">Sélectionner un éditeur</option>
+                                <option th:each="editeur : ${editeurs}" 
+                                        th:value="${editeur.id}" 
+                                        th:text="${editeur.nom}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="categories" class="form-label">Catégories</label>
+                            <select multiple  id="categories" name="categories" required>
+        <option th:each="cat : ${categories}"
+                th:value="${cat.id}"
+                th:text="${cat.nom}"></option>
+    </select><br>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="anneePublication" class="form-label">Année de publication</label>
+                            <input type="number" class="form-control" id="anneePublication" name="anneePublication" min="1800" max="2024">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="nombrePages" class="form-label">Nombre de pages</label>
+                            <input type="number" class="form-control" id="nombrePages" name="nombrePages" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="limitAge" class="form-label">Limite d'âge</label>
+                            <input type="number" class="form-control" id="limitAge" name="limitAge" min="0" max="18">
+                        </div>
+                        <div class="col-12">
+                            <label for="resume" class="form-label">Résumé</label>
+                            <textarea class="form-control" id="resume" name="resume" rows="4"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Ajouter le livre
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <label for="isbn" class="form-label">ISBN</label>
-            <input type="text" class="form-control" id="isbn" name="isbn">
-        </div>
-        <div class="col-md-4">
-            <label for="anneePublication" class="form-label">Année de publication</label>
-            <input type="number" class="form-control" id="anneePublication" name="anneePublication">
-        </div>
-        <div class="col-md-4">
-            <label for="nombrePages" class="form-label">Nombre de pages</label>
-            <input type="number" class="form-control" id="nombrePages" name="nombrePages">
-        </div>
-        <div class="col-md-4">
-            <label for="editeur" class="form-label">Éditeur</label>
-            <select class="form-select" id="editeur" name="editeurId" th:each="editeur : ${editeurs}" th:value="${editeur.id}" th:text="${editeur.nom}"></select>
-        </div>
-        <div class="col-md-4">
-            <label for="auteur" class="form-label">Auteur</label>
-            <select class="form-select" id="auteur" name="auteurId" th:each="auteur : ${auteurs}" th:value="${auteur.id}" th:text="${auteur.nom}"></select>
-        </div>
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Ajouter</button>
-        </div>
-    </form>
+    </div>
+
+    <!-- JS Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 

@@ -68,22 +68,23 @@ CREATE TABLE livre (
     isbn VARCHAR(120) UNIQUE,
     annee_publication INTEGER,
     nombre_pages INTEGER,
+    limit_age INTEGER,
     editeur_id INTEGER,
     auteur_id INTEGER,
+    resume VARCHAR(280),
     CONSTRAINT fk_livre_editeur FOREIGN KEY (editeur_id) REFERENCES editeur(id),
     CONSTRAINT fk_livre_auteur FOREIGN KEY (auteur_id) REFERENCES auteur(id)
 );
 
 CREATE TABLE categorie (
     id SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL UNIQUE,
-    limit_age INTEGER
+    nom VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE livre_categorie (
     livre_id INTEGER NOT NULL,
     categorie_id INTEGER NOT NULL,
-    PRIMARY KEY (livre_id, categorie_id),
+    PRIMARY KEY(livre_id,categorie_id),
     CONSTRAINT fk_lc_livre FOREIGN KEY (livre_id) REFERENCES livre(id),
     CONSTRAINT fk_lc_categorie FOREIGN KEY (categorie_id) REFERENCES categorie(id)
 );
@@ -99,11 +100,6 @@ CREATE TABLE exemplaire (
 -- ==========================================
 -- TABLES DE GESTION
 -- ==========================================
-
-CREATE TABLE statut (
-    id SERIAL PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL UNIQUE
-);
 
 CREATE TABLE reparation (
     id SERIAL PRIMARY KEY,
@@ -226,14 +222,13 @@ CREATE TABLE penalite (
 CREATE TABLE statut_exemplaire (
     id SERIAL PRIMARY KEY,
     exemplaire_id INTEGER NOT NULL,
-    statut_id INTEGER NOT NULL,
+    statut SMALLINT NOT NULL,
     date_changement TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     admin_id INTEGER,
     pret_id INTEGER,
     reservation_id INTEGER,
     notes TEXT,
     CONSTRAINT fk_statut_exemplaire FOREIGN KEY (exemplaire_id) REFERENCES exemplaire(id),
-    CONSTRAINT fk_statut_type FOREIGN KEY (statut_id) REFERENCES statut(id),
     CONSTRAINT fk_statut_personnel FOREIGN KEY (admin_id) REFERENCES personnel(id),
     CONSTRAINT fk_statut_pret FOREIGN KEY (pret_id) REFERENCES pret(id),
     CONSTRAINT fk_statut_reservation FOREIGN KEY (reservation_id) REFERENCES reservation(id)

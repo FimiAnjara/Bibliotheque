@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import com.bibliotheque.app.models.bibliographie.Exemplaire;
-import com.bibliotheque.app.models.suivi.Statut;
 import com.bibliotheque.app.models.utilisateur.Personnel;
 import com.bibliotheque.app.models.pret.Pret;
 import com.bibliotheque.app.models.pret.Reservation;
@@ -26,8 +25,7 @@ public class StatutExemplaire {
     private Exemplaire exemplaire;
 
     @ManyToOne
-    @JoinColumn(name = "statut_id")
-    private Statut statut;
+    private Integer statut;
 
     @ManyToOne
     @JoinColumn(name = "admin_id")

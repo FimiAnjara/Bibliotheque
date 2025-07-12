@@ -2,7 +2,6 @@ package com.bibliotheque.app.models.bibliographie;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.List;
 
 @Entity
 @Data
@@ -14,8 +13,5 @@ public class Categorie {
     private Long id;
 
     private String nom;
-    private Integer limitAge;
 
-    @OneToMany(mappedBy = "categorie")
-    private List<LivreCategorie> livreCategories;
 } 

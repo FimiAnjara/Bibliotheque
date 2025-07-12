@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Liste des Livres</title>
+    <!-- CSS (Bootstrap + Font Awesome) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/personnel.css}">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 p-0">
+               <div th:insert="~{fragments/personnel-sidebar :: personnel-sidebar}"></div>
+            </div>
+            
+            <!-- Contenu principal -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Simple Header avec Logo -->
+                <div class="simple-header fade-in">
+                    <div class="logo">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div>
+                        <h1>Liste des Livres</h1>
+                        <p class="mb-0">Gestion des livres</p>
+                    </div>
+                </div>
+
+                <!-- Alertes -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Contenu principal -->
+                <div class="content-wrapper fade-in">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-list me-2"></i>Livres enregistrés</h2>
+                        <a href="/personnel/livre/add" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Ajouter un livre
+                        </a>
+                    </div>
+
+                    <!-- Tableau des livres -->
+                    <div th:if="${not #lists.isEmpty(livres)}" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Titre</th>
+                                    <th>ISBN</th>
+                                    <th>Auteur</th>
+                                    <th>Éditeur</th>
+                                    <th>Année</th>
+                                    <th>Pages</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="livre : ${livres}">
+                                    <td th:text="${livre.id}"></td>
+                                    <td th:text="${livre.titre}"></td>
+                                    <td th:text="${livre.isbn}"></td>
+                                    <td th:text="${livre.auteur != null ? livre.auteur.nom + ' ' + livre.auteur.prenom : 'N/A'}"></td>
+                                    <td th:text="${livre.editeur != null ? livre.editeur.nom : 'N/A'}"></td>
+                                    <td th:text="${livre.anneePublication}"></td>
+                                    <td th:text="${livre.nombrePages}"></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- État vide -->
+                    <div th:if="${#lists.isEmpty(livres)}" class="empty-state">
+                        <i class="fas fa-book"></i>
+                        <h3>Aucun livre enregistré</h3>
+                        <p class="text-muted">Commencez par ajouter votre premier livre.</p>
+                        <a href="/personnel/livre/add" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Ajouter un livre
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

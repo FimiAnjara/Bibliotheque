@@ -1,11 +1,163 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
     <title>Accueil Personnel</title>
+    <!-- CSS (Bootstrap + Font Awesome) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/personnel.css}">
 </head>
 <body>
-    <h2>Bienvenue, Personnel !</h2>
-    <a th:href="@{/logout}">Déconnexion</a>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 p-0">
+               <div th:insert="~{fragments/personnel-sidebar :: personnel-sidebar}"></div>
+            </div>
+            
+            <!-- Contenu principal -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Simple Header avec Logo -->
+                <div class="simple-header fade-in">
+                    <div class="logo">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div>
+                        <h1>Bibliothèque</h1>
+                        <p class="mb-0">Système de gestion</p>
+                    </div>
+                </div>
+
+                <!-- Alertes -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Contenu principal -->
+                <div class="content-wrapper fade-in">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-user-edit text-white fs-4"></i>
+                                    </div>
+                                    <h5 class="card-title">Auteurs</h5>
+                                    <p class="card-text text-muted">Gérer les auteurs</p>
+                                    <a href="/personnel/auteur/add" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Ajouter
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <div class="bg-success bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-book text-white fs-4"></i>
+                                    </div>
+                                    <h5 class="card-title">Livres</h5>
+                                    <p class="card-text text-muted">Gérer les livres</p>
+                                    <a href="/personnel/livre/add" class="btn btn-success btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Ajouter
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <div class="bg-info bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-building text-white fs-4"></i>
+                                    </div>
+                                    <h5 class="card-title">Éditeurs</h5>
+                                    <p class="card-text text-muted">Gérer les éditeurs</p>
+                                    <a href="/personnel/editeur/add" class="btn btn-info btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Ajouter
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <div class="bg-warning bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-copy text-white fs-4"></i>
+                                    </div>
+                                    <h5 class="card-title">Exemplaires</h5>
+                                    <p class="card-text text-muted">Gérer les exemplaires</p>
+                                    <a href="/personnel/exemplaire/add" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Ajouter
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <div class="bg-secondary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-tags text-white fs-4"></i>
+                                    </div>
+                                    <h5 class="card-title">Catégories</h5>
+                                    <p class="card-text text-muted">Gérer les catégories</p>
+                                    <a href="/personnel/categorie/add" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Ajouter
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section Statistiques -->
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <h3 class="mb-4"><i class="fas fa-chart-bar me-2"></i>Statistiques Rapides</h3>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="bg-light p-3 rounded text-center">
+                                        <h4 class="text-primary mb-1">0</h4>
+                                        <small class="text-muted">Livres enregistrés</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="bg-light p-3 rounded text-center">
+                                        <h4 class="text-success mb-1">0</h4>
+                                        <small class="text-muted">Exemplaires disponibles</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="bg-light p-3 rounded text-center">
+                                        <h4 class="text-info mb-1">0</h4>
+                                        <small class="text-muted">Auteurs</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="bg-light p-3 rounded text-center">
+                                        <h4 class="text-warning mb-1">0</h4>
+                                        <small class="text-muted">Éditeurs</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>
