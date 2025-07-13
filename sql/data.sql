@@ -85,3 +85,28 @@ INSERT INTO exemplaire (reference, date_acquisition, livre_id) VALUES
 -- 1 exemplaire d'Orgueil et Préjugés
 ('OP1-001', '2020-07-14', 6);
 
+-- Statuts d'exemplaires (données de test)
+INSERT INTO statut_exemplaire (exemplaire_id, statut, date_changement, admin_id, notes) VALUES
+-- HP1-001 : Disponible
+(1, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible'),
+-- HP1-002 : Emprunté
+(2, 2, '2024-01-15 14:30:00', 4, 'Exemplaire emprunté par un étudiant'),
+-- HP1-003 : Disponible
+(3, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible'),
+-- TDF1-001 : En réparation
+(4, 4, '2024-01-10 09:15:00', 4, 'Exemplaire en réparation - page détachée'),
+-- TDF1-002 : Disponible
+(5, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible'),
+-- SDA1-001 : Réservé
+(6, 3, '2024-01-20 16:45:00', 4, 'Exemplaire réservé pour un cours'),
+-- SDA1-002 : Disponible
+(7, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible'),
+-- 1984-001 : Perdu
+(8, 5, '2024-01-05 11:20:00', 4, 'Exemplaire signalé comme perdu'),
+-- LM1-001 : Disponible
+(9, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible'),
+-- LM1-002 : Hors service
+(10, 6, '2024-01-12 13:30:00', 4, 'Exemplaire hors service - état dégradé'),
+-- OP1-001 : Disponible
+(11, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible');
+
