@@ -41,32 +41,69 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
 
+                <!-- Information sur le statut par défaut -->
+                <div class="content-wrapper fade-in mb-4">
+                    <div class="alert alert-info" role="alert">
+                        <h6><i class="fas fa-info-circle me-2"></i>Information</h6>
+                        <p class="mb-0">
+                            <strong>Statut par défaut :</strong> Tous les nouveaux exemplaires seront automatiquement 
+                            marqués comme <span class="badge bg-success">Disponible</span> lors de leur création.
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Formulaire -->
                 <div class="content-wrapper fade-in">
-                    <form th:action="@{/personnel/exemplaire/add}" method="post" class="row g-3">
-                        <div class="col-md-6">
-                            <label for="livreId" class="form-label">Livre</label>
-                            <select class="form-select" id="livreId" name="livreId" required>
-                                <option value="">Sélectionner un livre</option>
-                                <option th:each="livre : ${livres}" 
-                                        th:value="${livre.id}" 
-                                        th:text="${livre.titre}"></option>
-                            </select>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-plus me-2"></i>Nouvel exemplaire
+                            </h5>
                         </div>
-                        <div class="col-md-6">
-                            <label for="reference" class="form-label">Réference</label>
-                            <input type="text" class="form-control" id="reference" name="reference" required>
+                        <div class="card-body">
+                            <form th:action="@{/personnel/exemplaire/add}" method="post" class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="livreId" class="form-label">
+                                        <i class="fas fa-book me-1"></i>Livre <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="livreId" name="livreId" required>
+                                        <option value="">Sélectionner un livre</option>
+                                        <option th:each="livre : ${livres}" 
+                                                th:value="${livre.id}" 
+                                                th:text="${livre.titre + ' - ' + livre.auteur.nom + ' ' + livre.auteur.prenom}">
+                                        </option>
+                                    </select>
+                                    <div class="form-text">Choisissez le livre auquel cet exemplaire appartient</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="reference" class="form-label">
+                                        <i class="fas fa-barcode me-1"></i>Référence <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="reference" name="reference" 
+                                           required placeholder="Ex: HP1-004">
+                                    <div class="form-text">Code unique d'identification de l'exemplaire</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="dateAcquisition" class="form-label">
+                                        <i class="fas fa-calendar me-1"></i>Date d'acquisition
+                                    </label>
+                                    <input type="date" class="form-control" id="dateAcquisition" name="dateAcquisition">
+                                    <div class="form-text">Date à laquelle l'exemplaire a été acquis par la bibliothèque</div>
+                                </div>
+                                <div class="col-12">
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <a href="/personnel/exemplaire/list" class="btn btn-secondary">
+                                            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>Ajouter l'exemplaire
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
-                        <div class="col-md-6">
-                            <label for="dateAcquisition" class="form-label">Date d'acquisition</label>
-                            <input type="date" class="form-control" id="dateAcquisition" name="dateAcquisition">
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-plus me-2"></i>Ajouter l'exemplaire
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

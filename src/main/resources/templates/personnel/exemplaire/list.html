@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Liste des Exemplaires</title>
+    <!-- CSS (Bootstrap + Font Awesome) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/personnel.css}">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 p-0">
+               <div th:insert="~{fragments/personnel-sidebar :: personnel-sidebar}"></div>
+            </div>
+            
+            <!-- Contenu principal -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Simple Header avec Logo -->
+                <div class="simple-header fade-in">
+                    <div class="logo">
+                        <i class="fas fa-copy"></i>
+                    </div>
+                    <div>
+                        <h1>Liste des Exemplaires</h1>
+                        <p class="mb-0">Gestion des exemplaires</p>
+                    </div>
+                </div>
+
+                <!-- Alertes -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Formulaire de recherche -->
+                <div class="content-wrapper fade-in mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-search me-2"></i>Recherche d'exemplaires
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/personnel/exemplaire/list}" method="get" class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="search" class="form-label">Recherche générale</label>
+                                    <input type="text" class="form-control" id="search" name="search" 
+                                           th:value="${search}" placeholder="Livre, auteur, référence...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="livre" class="form-label">Livre</label>
+                                    <input type="text" class="form-control" id="livre" name="livre" 
+                                           th:value="${livre}" placeholder="Titre du livre...">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="reference" class="form-label">Référence</label>
+                                    <input type="text" class="form-control" id="reference" name="reference" 
+                                           th:value="${reference}" placeholder="Référence...">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="statut" class="form-label">Statut</label>
+                                    <select class="form-select" id="statut" name="statut">
+                                        <option value="">Tous les statuts</option>
+                                        <option th:each="statutOption : ${statuts}" 
+                                                th:value="${statutOption.code}" 
+                                                th:text="${statutOption.libelle}"
+                                                th:selected="${statutOption.code == statut}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <div class="d-grid gap-2 w-100">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-search me-1"></i>Rechercher
+                                        </button>
+                                        <a href="/personnel/exemplaire/list" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-times me-1"></i>Effacer
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tableau des exemplaires -->
+                <div class="content-wrapper fade-in">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>Exemplaires
+                                    <span th:if="${exemplaires != null and exemplaires.size() > 0}" 
+                                          class="badge bg-light text-primary ms-2" 
+                                          th:text="${exemplaires.size() + ' résultat(s)'}">
+                                    </span>
+                                </h5>
+                                <a href="/personnel/exemplaire/add" class="btn btn-light btn-sm">
+                                    <i class="fas fa-plus me-1"></i>Ajouter
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Référence</th>
+                                            <th>Livre</th>
+                                            <th>Date d'acquisition</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="exemplaire : ${exemplaires}" th:if="${exemplaires != null}">
+                                            <td>
+                                                <span class="fw-bold" th:text="${exemplaire.reference}"></span>
+                                            </td>
+                                            <td>
+                                                <div th:if="${exemplaire.livre != null}">
+                                                    <div class="fw-semibold" th:text="${exemplaire.livre.titre}"></div>
+                                                    <small class="text-muted" 
+                                                           th:if="${exemplaire.livre.auteur != null}"
+                                                           th:text="${exemplaire.livre.auteur.nom + ' ' + exemplaire.livre.auteur.prenom}">
+                                                    </small>
+                                                </div>
+                                                <div th:if="${exemplaire.livre == null}" class="text-muted">
+                                                    <em>Livre non assigné</em>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span th:if="${exemplaire.dateAcquisition != null}" 
+                                                      th:text="${#temporals.format(exemplaire.dateAcquisition, 'dd/MM/yyyy')}">
+                                                </span>
+                                                <span th:if="${exemplaire.dateAcquisition == null}" class="text-muted">
+                                                    <em>Non définie</em>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge" 
+                                                      th:if="${statutsActuels != null and statutsActuels.get(exemplaire.id) != null}"
+                                                      th:classappend="${statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).DISPONIBLE ? 'bg-success' : 
+                                                                       statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).EMPRUNTE ? 'bg-warning' :
+                                                                       statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).RESERVE ? 'bg-info' :
+                                                                       statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).EN_REPARATION ? 'bg-secondary' :
+                                                                       statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).PERDU ? 'bg-danger' : 'bg-dark'}"
+                                                      th:text="${statutsActuels.get(exemplaire.id).libelle}">
+                                                </span>
+                                                <span th:if="${statutsActuels == null or statutsActuels.get(exemplaire.id) == null}" 
+                                                      class="badge bg-secondary">
+                                                    Disponible
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a th:href="@{/personnel/statut-exemplaire/change/{id}(id=${exemplaire.id})}" 
+                                                       class="btn btn-outline-primary btn-sm" 
+                                                       title="Changer le statut">
+                                                        <i class="fas fa-exchange-alt"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${exemplaires == null or #lists.isEmpty(exemplaires)}">
+                                            <td colspan="5" class="text-center text-muted py-4">
+                                                <i class="fas fa-search fa-2x mb-3"></i>
+                                                <p>Aucun exemplaire trouvé</p>
+                                                <small class="text-muted">Essayez de modifier vos critères de recherche</small>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Message d'aide -->
+                <div class="content-wrapper fade-in mt-3">
+                    <div class="alert alert-info" role="alert">
+                        <h6><i class="fas fa-info-circle me-2"></i>Informations</h6>
+                        <ul class="mb-0">
+                            <li>Utilisez la recherche générale pour chercher par livre, auteur ou référence</li>
+                            <li>Vous pouvez filtrer par statut pour voir les exemplaires disponibles, empruntés, etc.</li>
+                            <li>Cliquez sur l'icône <i class="fas fa-exchange-alt"></i> pour changer le statut d'un exemplaire</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

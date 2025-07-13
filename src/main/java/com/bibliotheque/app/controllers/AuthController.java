@@ -31,11 +31,6 @@ public class AuthController {
         return "login";
     }
 
-    @GetMapping("/adherent/home")
-    public String adherentHome() {
-        return "adherent/home";
-    }
-
     @GetMapping("/personnel/home")
     public String home(Model model) {
         model.addAttribute("activePage", "home");
