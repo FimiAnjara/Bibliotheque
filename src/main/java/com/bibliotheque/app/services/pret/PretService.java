@@ -9,6 +9,8 @@ import com.bibliotheque.app.services.suivi.PenaliteService;
 import com.bibliotheque.app.models.suivi.Penalite;
 import com.bibliotheque.app.services.gestion.AbonnementService;
 import com.bibliotheque.app.models.gestion.Abonnement;
+import com.bibliotheque.app.models.pret.Validation;
+import com.bibliotheque.app.services.pret.ValidationService;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class PretService {
 
     @Autowired
     private AbonnementService abonnementService;
+
+    @Autowired
+    private ValidationService validationService;
 
     public List<Pret> findAll() { return pretRepository.findAll(); }
     public Optional<Pret> findById(Long id) { return pretRepository.findById(id); }
@@ -82,4 +87,14 @@ public class PretService {
         ConfigurationQuota config = configurationQuotaService.findByProfil(adherent.getProfil());
         return datePret.plusDays(config.getDureeMaxPret());
     } 
+
+    public List<Pret> findNonRendusEtValides() {
+        List<Pret> tous = pretRepository.findAll();
+        return tous.stream()
+            .filter(pret -> pret.getDateRetourEffectuer() == null)
+            .filter(pret -> validationService.findAll().stream()
+                .anyMatch(v -> v.getPret() != null && v.getPret().getId().equals(pret.getId()) && Boolean.TRUE.equals(v.getValidationStatus()))
+            )
+            .toList();
+    }
 } 

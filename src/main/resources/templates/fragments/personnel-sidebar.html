@@ -146,6 +146,14 @@
                     </a>
                 </li>
 
+                <!-- Menu Prêts non rendus -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/personnel/pret/non-rendu}"
+                       th:classappend="${activePage == 'pret-non-rendu'} ? 'active'">
+                        <i class="fas fa-clock me-2"></i>Prêts non rendus
+                    </a>
+                </li>
+
                 <li class="nav-item mt-3">
                     <a class="nav-link text-danger" th:href="@{/logout}">
                         <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
