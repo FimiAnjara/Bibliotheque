@@ -12,40 +12,55 @@ import com.bibliotheque.app.models.suivi.StatutExemplaire;
 import com.bibliotheque.app.models.suivi.Notification;
 
 @Entity
+@Table(name = "pret")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"adherent", "exemplaire", "prolongements", "reservation", "statutExemplaires", "notifications"})
 public class Pret {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "date_pret", nullable = false)
     private LocalDateTime datePret;
-    private LocalDateTime dateRetourPrevu;
-    private LocalDateTime dateRetourEffectuer;
-    private String typePret;
-    private String notes;
-    private LocalDateTime dateValidation;
-    private LocalDateTime dateAnnulation;
 
-    @ManyToOne
-    @JoinColumn(name = "adherent_id")
+    @Column(name = "date_retour_prevu", nullable = false)
+    private LocalDateTime dateRetourPrevu;
+
+    @Column(name = "date_retour_effectuer")
+    private LocalDateTime dateRetourEffectuer;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type_pret", nullable = false)
+    private TypePret typePret;
+
+    @Column(name = "notes")
+    private String notes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "adherent_id", nullable = false)
     private Adherent adherent;
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id")
-    private Personnel admin;
-
-    @ManyToOne
-    @JoinColumn(name = "exemplaire_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exemplaire_id", nullable = false)
     private Exemplaire exemplaire;
 
-    @OneToMany(mappedBy = "pret")
+    @OneToMany(mappedBy = "pret", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ProlongementPret> prolongements;
 
-    @OneToMany(mappedBy = "pret")
+    @OneToMany(mappedBy = "pret", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<StatutExemplaire> statutExemplaires;
 
-    @OneToMany(mappedBy = "pret")
+    @OneToMany(mappedBy = "pret", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notification> notifications;
+
+    public enum TypePret {
+    Domicile,
+    Sur_place;
+
+    public String toDatabaseValue() {
+        return this.name().replace('_', ' ');
+    }
 } 
+}

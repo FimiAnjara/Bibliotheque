@@ -37,8 +37,8 @@ public class StatutExemplaireController {
             return "redirect:/";
         }
         
-        Optional<Personnel> personnelOpt = personnelService.findById(user.getId());
-        if (personnelOpt.isEmpty()) {
+        Personnel personnel = personnelService.findById(user.getId());
+        if (personnel == null) {
             return "redirect:/";
         }
         
@@ -72,8 +72,8 @@ public class StatutExemplaireController {
             return "redirect:/";
         }
         
-        Optional<Personnel> personnelOpt = personnelService.findById(user.getId());
-        if (personnelOpt.isEmpty()) {
+        Personnel personnel = personnelService.findById(user.getId());
+        if (personnel == null) {
             return "redirect:/";
         }
         
@@ -85,7 +85,6 @@ public class StatutExemplaireController {
         
         try {
             Exemplaire exemplaire = exemplaireOpt.get();
-            Personnel personnel = personnelOpt.get();
             StatutExemplaire.Statut statut = StatutExemplaire.Statut.fromCode(nouveauStatut);
             
             statutExemplaireService.changeStatut(exemplaire, statut, personnel, notes);

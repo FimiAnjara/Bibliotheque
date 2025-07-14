@@ -16,9 +16,7 @@ CREATE TABLE utilisateur (
 
 CREATE TABLE profil (
     id SERIAL PRIMARY KEY,
-    nom VARCHAR(128) NOT NULL,
-    quota_max INTEGER NOT NULL CHECK (quota_max >= 1),
-    duree_max_pret INTEGER
+    nom VARCHAR(128) NOT NULL
 );
 
 -- ==========================================
@@ -141,7 +139,6 @@ CREATE TABLE abonnement (
     date_fin DATE NOT NULL,
     date_paiement DATE NOT NULL,
     montant_paye DECIMAL(10,2) NOT NULL CHECK (montant_paye >= 0),
-    mode_paiement VARCHAR(50) CHECK (mode_paiement IN ('Carte', 'Espèces', 'Chèque', 'Virement', 'En ligne')),
     adherent_id INTEGER NOT NULL,
     type_abonnement_id INTEGER NOT NULL,
     CONSTRAINT fk_abonnement_adherent FOREIGN KEY (adherent_id) REFERENCES adherent(id),
@@ -149,21 +146,16 @@ CREATE TABLE abonnement (
     CHECK (date_fin > date_debut),
     CHECK (date_paiement <= date_debut)
 );
-
 CREATE TABLE pret (
     id SERIAL PRIMARY KEY,
     date_pret TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     date_retour_prevu TIMESTAMP NOT NULL,
     date_retour_effectuer TIMESTAMP,
     adherent_id INTEGER NOT NULL,
-    admin_id INTEGER NOT NULL,
     exemplaire_id INTEGER NOT NULL,
     type_pret VARCHAR(50) NOT NULL CHECK (type_pret IN ('Domicile', 'Sur place')),
     notes TEXT,
-    date_validation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    date_annulation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_pret_adherent FOREIGN KEY (adherent_id) REFERENCES adherent(id),
-    CONSTRAINT fk_pret_personnel FOREIGN KEY (admin_id) REFERENCES personnel(id),
     CONSTRAINT fk_pret_exemplaire FOREIGN KEY (exemplaire_id) REFERENCES exemplaire(id),
     CHECK (date_retour_prevu > date_pret)
 );
@@ -185,13 +177,25 @@ CREATE TABLE reservation (
     date_souhaiter TIMESTAMP NOT NULL,
     adherent_id INTEGER NOT NULL,
     exemplaire_id INTEGER NOT NULL,
-    admin_id INTEGER NOT NULL,
-    date_annulation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_reservation_adherent FOREIGN KEY (adherent_id) REFERENCES adherent(id),
     CONSTRAINT fk_reservation_exemplaire FOREIGN KEY (exemplaire_id) REFERENCES exemplaire(id),
-    CONSTRAINT fk_reservation_personnel FOREIGN KEY (admin_id) REFERENCES personnel(id),
     CHECK (date_expiration > date_reservation)
 );
+
+CREATE TABLE validation (
+    id SERIAL PRIMARY KEY,
+    reservation_id INTEGER,
+    pret_id INTEGER,
+    prolongement_id INTEGER,
+    date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    validation_status BOOLEAN NOT NULL,
+    admin_id INTEGER NOT NULL,
+    CONSTRAINT fk_validation_pret FOREIGN KEY (pret_id) REFERENCES pret(id),
+    CONSTRAINT fk_validation_prolongement FOREIGN KEY (prolongement_id) REFERENCES prolongement_pret(id),
+    CONSTRAINT fk_validation_reservation FOREIGN KEY (reservation_id) REFERENCES reservation(id),
+    CONSTRAINT fk_validation_personnel FOREIGN KEY (admin_id) REFERENCES personnel(id)
+);
+
 
 -- ==========================================
 -- TABLES DE SUIVI
@@ -239,12 +243,14 @@ CREATE TABLE notification (
     utilisateur_id INTEGER NOT NULL,
     message TEXT NOT NULL,
     date_creation TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    est_lu BOOLEAN DEFAULT FALSE,
     pret_id INTEGER,
     reservation_id INTEGER,
     CONSTRAINT fk_notification_utilisateur FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id),
     CONSTRAINT fk_notification_pret FOREIGN KEY (pret_id) REFERENCES pret(id),
     CONSTRAINT fk_notification_reservation FOREIGN KEY (reservation_id) REFERENCES reservation(id)
 );
+
 
 -- ==========================================
 -- TABLES ANNEXES

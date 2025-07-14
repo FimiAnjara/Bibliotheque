@@ -149,11 +149,11 @@
                                             <td>
                                                 <span class="badge" 
                                                       th:if="${statutsActuels != null and statutsActuels.get(exemplaire.id) != null}"
-                                                      th:classappend="${statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).DISPONIBLE ? 'bg-success' : 
-                                                                       statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).EMPRUNTE ? 'bg-warning' :
-                                                                       statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).RESERVE ? 'bg-info' :
-                                                                       statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).EN_REPARATION ? 'bg-secondary' :
-                                                                       statutsActuels.get(exemplaire.id) == T(com.bibliotheque.app.models.suivi.StatutExemplaire$Statut).PERDU ? 'bg-danger' : 'bg-dark'}"
+                                                      th:classappend="${statutsActuels.get(exemplaire.id).code == 1 ? 'bg-success' : 
+                                                                       statutsActuels.get(exemplaire.id).code == 2 ? 'bg-warning' :
+                                                                       statutsActuels.get(exemplaire.id).code == 3 ? 'bg-info' :
+                                                                       statutsActuels.get(exemplaire.id).code == 4 ? 'bg-secondary' :
+                                                                       statutsActuels.get(exemplaire.id).code == 5 ? 'bg-danger' : 'bg-dark'}"
                                                       th:text="${statutsActuels.get(exemplaire.id).libelle}">
                                                 </span>
                                                 <span th:if="${statutsActuels == null or statutsActuels.get(exemplaire.id) == null}" 

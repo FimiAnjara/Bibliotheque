@@ -7,10 +7,11 @@ import java.util.List;
 import com.bibliotheque.app.models.suivi.Notification;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Utilisateur {
+public abstract class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,12 +24,6 @@ public class Utilisateur {
     private String password;
     private String telephone;
 
-    @OneToOne(mappedBy = "utilisateur")
-    private Adherent adherent;
-
-    @OneToOne(mappedBy = "utilisateur")
-    private Personnel personnel;
-
     @OneToMany(mappedBy = "utilisateur")
     private List<Notification> notifications;
-} 
+}

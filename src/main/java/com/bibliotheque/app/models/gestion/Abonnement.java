@@ -19,7 +19,6 @@ public class Abonnement {
     private LocalDate dateFin;
     private LocalDate datePaiement;
     private Double montantPaye;
-    private String modePaiement;
 
     @ManyToOne
     @JoinColumn(name = "adherent_id")

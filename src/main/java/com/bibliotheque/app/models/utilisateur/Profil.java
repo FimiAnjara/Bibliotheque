@@ -15,12 +15,12 @@ public class Profil {
     private Long id;
 
     private String nom;
-    private Integer quotaMax;
-    private Integer dureeMaxPret;
 
     @OneToMany(mappedBy = "profil")
+    @ToString.Exclude
     private List<Adherent> adherents;
 
     @OneToMany(mappedBy = "profil")
+    @ToString.Exclude
     private List<ConfigurationQuota> configurationQuotas;
 } 
