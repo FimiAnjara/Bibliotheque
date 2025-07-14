@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mes prêts en cours</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/adherent.css}">  
+</head>
+<body>
+<div th:insert="~{fragments/adherent-navbar :: adherent-navbar}"></div>
+<div class="container mt-4">
+    <h2 class="mb-4">Mes prêts en cours</h2>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Exemplaire</th>
+                    <th>Date de prêt</th>
+                    <th>Date retour prévue</th>
+                    <th>Jours restants</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="pret : ${pretsEnCours}">
+                    <td th:text="${pret.exemplaire != null ? pret.exemplaire.reference : ''}"></td>
+                    <td th:text="${#temporals.format(pret.datePret, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${#temporals.format(pret.dateRetourPrevu, 'dd/MM/yyyy')}"></td>
+                    <td>
+                        <span th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), pret.dateRetourPrevu.toLocalDate())}"></span>
+                    </td>
+                    <td>
+                        <a th:if="${!pretAvecProlongementNonValide[pret.id]}"
+                           th:href="@{/adherent/pret/prolonger/{id}(id=${pret.id})}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i> Demander un prolongement
+                        </a>
+                        <span th:if="${pretAvecProlongementNonValide[pret.id]}" class="text-muted small">Demande en attente</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(pretsEnCours)}">
+                    <td colspan="5" class="text-center text-muted">Aucun prêt en cours.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Demande de prolongement</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/adherent.css}">  
+</head>
+<body>
+<div th:insert="~{fragments/adherent-navbar :: adherent-navbar}"></div>
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Demande de prolongement</h4>
+        </div>
+        <div class="card-body">
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <form th:action="@{/adherent/pret/prolonger/{id}(id=${pret.id})}" method="post">
+                <div class="mb-3">
+                    <label for="nouvelleDateRetour" class="form-label">Nouvelle date de retour souhaitée</label>
+                    <input type="date" class="form-control" id="nouvelleDateRetour" name="nouvelleDateRetour" required>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/adherent/prets}" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i>Retour à mes prêts</a>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-check me-1"></i>Envoyer la demande</button>
+                </div>
+            </form>
+            <hr>
+            <h5>Détails du prêt</h5>
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Exemplaire :</strong> <span th:text="${pret.exemplaire != null ? pret.exemplaire.reference : ''}"></span></li>
+                <li class="list-group-item"><strong>Date de prêt :</strong> <span th:text="${#temporals.format(pret.datePret, 'dd/MM/yyyy')}"></span></li>
+                <li class="list-group-item"><strong>Date retour prévue :</strong> <span th:text="${#temporals.format(pret.dateRetourPrevu, 'dd/MM/yyyy')}"></span></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

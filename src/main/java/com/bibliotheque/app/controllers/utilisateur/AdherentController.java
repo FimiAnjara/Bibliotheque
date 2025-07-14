@@ -4,11 +4,13 @@ import com.bibliotheque.app.models.utilisateur.Adherent;
 import com.bibliotheque.app.models.utilisateur.Utilisateur;
 import com.bibliotheque.app.models.pret.Pret;
 import com.bibliotheque.app.models.pret.Reservation;
+import com.bibliotheque.app.models.pret.ProlongementPret;
 import com.bibliotheque.app.models.bibliographie.Livre;
 import com.bibliotheque.app.models.bibliographie.Exemplaire;
 import com.bibliotheque.app.services.utilisateur.AdherentService;
 import com.bibliotheque.app.services.pret.PretService;
 import com.bibliotheque.app.services.pret.ReservationService;
+import com.bibliotheque.app.services.pret.ProlongementPretService;
 import com.bibliotheque.app.services.bibliographie.LivreService;
 import com.bibliotheque.app.services.bibliographie.ExemplaireService;
 import com.bibliotheque.app.repositories.bibliographie.ExemplaireRepository;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
@@ -58,6 +61,9 @@ public class AdherentController {
     
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private ProlongementPretService prolongementPretService;
 
     @GetMapping("/home")
     public String home(Model model, HttpSession session) {
@@ -386,5 +392,75 @@ public String notifications(Model model, HttpSession session) {
         }
         
         return response;
+    }
+
+    @GetMapping("/prets")
+    public String prets(Model model, HttpSession session) {
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/";
+        }
+        Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
+        if (adherentOpt.isEmpty()) {
+            return "redirect:/";
+        }
+        Adherent adherent = adherentOpt.get();
+        List<Pret> pretsEnCours = pretService.findByAdherentAndDateRetourEffectuerIsNull(adherent);
+        Map<Long, Boolean> pretAvecProlongementNonValide = new HashMap<>();
+        for (Pret pret : pretsEnCours) {
+            boolean hasNonValide = prolongementPretService.hasNonValideProlongement(pret);
+            pretAvecProlongementNonValide.put(pret.getId(), hasNonValide);
+        }
+        model.addAttribute("pretsEnCours", pretsEnCours);
+        model.addAttribute("pretAvecProlongementNonValide", pretAvecProlongementNonValide);
+        model.addAttribute("user", user);
+        return "adherent/prets";
+    }
+
+    @GetMapping("/pret/prolonger/{pretId}")
+    public String demanderProlongementForm(@PathVariable Long pretId, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/";
+        }
+        Optional<Pret> pretOpt = pretService.findById(pretId);
+        if (pretOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Prêt introuvable.");
+            return "redirect:/adherent/prets";
+        }
+        Pret pret = pretOpt.get();
+        boolean hasNonValide = prolongementPretService.hasNonValideProlongement(pret);
+        if (hasNonValide) {
+            redirectAttributes.addFlashAttribute("error", "Vous avez déjà une demande de prolongement en attente de validation pour ce prêt.");
+            return "redirect:/adherent/prets";
+        }
+        model.addAttribute("pret", pret);
+        return "adherent/demande-prolongement";
+    }
+
+    @PostMapping("/pret/prolonger/{pretId}")
+    public String demanderProlongement(@PathVariable Long pretId, @RequestParam("nouvelleDateRetour") String nouvelleDateRetourStr, HttpSession session, RedirectAttributes redirectAttributes) {
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/";
+        }
+        Optional<Pret> pretOpt = pretService.findById(pretId);
+        if (pretOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Prêt introuvable.");
+            return "redirect:/adherent/prets";
+        }
+        Pret pret = pretOpt.get();
+        try {
+            java.time.LocalDateTime nouvelleDateRetour = java.time.LocalDate.parse(nouvelleDateRetourStr).atStartOfDay();
+            ProlongementPret prolongement = new ProlongementPret();
+            prolongement.setPret(pret);
+            prolongement.setDateProlongement(java.time.LocalDateTime.now());
+            prolongement.setDateRetourPrevu(nouvelleDateRetour);
+            prolongementPretService.save(prolongement);
+            redirectAttributes.addFlashAttribute("success", "Demande de prolongement envoyée.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Erreur : " + e.getMessage());
+        }
+        return "redirect:/adherent/prets";
     }
 } 
