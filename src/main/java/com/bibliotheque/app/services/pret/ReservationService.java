@@ -89,17 +89,16 @@ public class ReservationService {
         return reservationsActives < quotaMax;
     }
     
-    public ReservationQuotaInfo getQuotaInfo(Adherent adherent) {
+    public int getQuotaReservation(Adherent adherent) {
         ConfigurationQuota config = configurationQuotaService.findByProfil(adherent.getProfil());
-        
-        int quotaMax = 0;
         if (config != null) {
-            quotaMax = config.getQuotaReservation();
+            return config.getQuotaReservation();
         }
-        
-        int reservationsActives = countReservationsActives(adherent);
-        
-        return new ReservationQuotaInfo(quotaMax, reservationsActives);
+        return 0;
+    }
+
+    public int getReservationsActives(Adherent adherent) {
+        return countReservationsActives(adherent);
     }
     
     public Reservation createReservation(Adherent adherent, Exemplaire exemplaire, LocalDateTime dateSouhaiter) {
@@ -113,18 +112,4 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
     
-    public static class ReservationQuotaInfo {
-        private final int quotaMax;
-        private final int reservationsActives;
-        
-        public ReservationQuotaInfo(int quotaMax, int reservationsActives) {
-            this.quotaMax = quotaMax;
-            this.reservationsActives = reservationsActives;
-        }
-        
-        public int getQuotaMax() { return quotaMax; }
-        public int getReservationsActives() { return reservationsActives; }
-        public int getReservationsRestantes() { return quotaMax - reservationsActives; }
-        public boolean peutReserver() { return reservationsActives < quotaMax; }
-    }
 } 
