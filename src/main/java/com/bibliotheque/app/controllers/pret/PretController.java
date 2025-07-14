@@ -7,6 +7,15 @@ import com.bibliotheque.app.models.pret.Validation;
 import com.bibliotheque.app.models.pret.ProlongementPret;
 import com.bibliotheque.app.services.pret.ProlongementPretService;
 import com.bibliotheque.app.services.utilisateur.PersonnelService;
+import com.bibliotheque.app.services.suivi.TypePenaliteService;
+import com.bibliotheque.app.services.suivi.PenaliteService;
+import com.bibliotheque.app.models.suivi.TypePenalite;
+import com.bibliotheque.app.models.suivi.Penalite;
+import com.bibliotheque.app.models.utilisateur.Personnel;
+import com.bibliotheque.app.models.utilisateur.Utilisateur;
+import com.bibliotheque.app.services.suivi.StatutExemplaireService;
+import com.bibliotheque.app.models.bibliographie.Exemplaire;
+import com.bibliotheque.app.models.suivi.StatutExemplaire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,8 +40,13 @@ public class PretController {
     private ProlongementPretService prolongementPretService;
     @Autowired
     private PersonnelService personnelService;
+    @Autowired
+    private TypePenaliteService typePenaliteService;
+    @Autowired
+    private PenaliteService penaliteService;
+    @Autowired
+    private StatutExemplaireService statutExemplaireService;
 
-    // Liste des prêts non rendus et validés
     @GetMapping("/non-rendu")
     public String pretsNonRendus(Model model) {
         List<Pret> pretsNonRendus = pretService.findNonRendusEtValides();
@@ -45,7 +59,6 @@ public class PretController {
         return "personnel/pret-non-rendu";
     }
 
-    // Formulaire de retour
     @GetMapping("/retour/{id}")
     public String retourForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<Pret> pretOpt = pretService.findById(id);
@@ -57,9 +70,8 @@ public class PretController {
         return "personnel/pret-retour";
     }
 
-    // Traitement du retour
     @PostMapping("/retour/{id}")
-    public String validerRetour(@PathVariable Long id, @RequestParam("dateRetour") String dateRetourStr, RedirectAttributes redirectAttributes) {
+    public String validerRetour(@PathVariable Long id, @RequestParam("dateRetour") String dateRetourStr, RedirectAttributes redirectAttributes, HttpSession session) {
         Optional<Pret> pretOpt = pretService.findById(id);
         if (pretOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Prêt introuvable.");
@@ -70,7 +82,34 @@ public class PretController {
             LocalDate dateRetour = LocalDate.parse(dateRetourStr);
             pret.setDateRetourEffectuer(dateRetour.atStartOfDay());
             pretService.save(pret);
-            redirectAttributes.addFlashAttribute("success", "Retour enregistré avec succès.");
+            com.bibliotheque.app.models.utilisateur.Utilisateur user = (com.bibliotheque.app.models.utilisateur.Utilisateur) session.getAttribute("user");
+            Personnel personnel = null;
+            if (user != null) {
+                personnel = personnelService.findById(user.getId());
+            }
+            Exemplaire exemplaire = pret.getExemplaire();
+            statutExemplaireService.changeStatut(exemplaire, StatutExemplaire.Statut.DISPONIBLE, personnel, "Retour de prêt");
+            java.time.LocalDateTime datePrevue = pretService.getDateRetourPrevueEffective(pret.getId());
+            if (pret.getDateRetourEffectuer() != null && datePrevue != null && pret.getDateRetourEffectuer().isAfter(datePrevue)) {
+                long joursRetard = penaliteService.calculerJoursRetard(datePrevue, pret.getDateRetourEffectuer());
+                List<TypePenalite> types = typePenaliteService.findAll();
+                TypePenalite type = penaliteService.getTypePenalitePourRetardOuDefaut(types, joursRetard);
+                Penalite penalite = new Penalite();
+                penalite.setAdherent(pret.getAdherent());
+                penalite.setTypePenalite(type);
+                penalite.setDateApplication(pret.getDateRetourEffectuer().toLocalDate());
+                penalite.setDateFin(penalite.getDateApplication().plusDays(type.getDureeJours() != null ? type.getDureeJours() : 7));
+                penalite.setNotes("Retard de " + joursRetard + " jours sur le prêt #" + pret.getId());
+                Utilisateur currentUser = (Utilisateur) session.getAttribute("user");
+                if (currentUser != null) {
+                    Personnel adminPersonnel = personnelService.findById(currentUser.getId());
+                    penalite.setAdmin(adminPersonnel);
+                }
+                penaliteService.save(penalite);
+                redirectAttributes.addFlashAttribute("warning", "Retour en retard : pénalité appliquée (" + type.getDureeJours() + " jours)");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Retour enregistré avec succès.");
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Erreur lors de l'enregistrement du retour : " + e.getMessage());
             return "redirect:/personnel/pret/retour/" + id;
@@ -78,7 +117,6 @@ public class PretController {
         return "redirect:/personnel/pret/non-rendu";
     }
 
-    // Liste des prolongements en attente de validation
     @GetMapping("/prolongements/attente")
     public String prolongementsAttente(Model model) {
         List<ProlongementPret> prolongements = prolongementPretService.findAll().stream()
@@ -88,7 +126,6 @@ public class PretController {
         return "personnel/prolongement/prolongement-attente";
     }
 
-    // Formulaire de validation d'un prolongement
     @GetMapping("/prolongements/valider/{id}")
     public String validerProlongementForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<ProlongementPret> prolongementOpt = prolongementPretService.findById(id);
@@ -100,7 +137,6 @@ public class PretController {
         return "personnel/prolongement/prolongement-valider";
     }
 
-    // Traitement de la validation/refus d'un prolongement
     @PostMapping("/prolongements/valider/{id}")
     public String validerProlongement(@PathVariable Long id, @RequestParam("validation") boolean validation, HttpSession session, RedirectAttributes redirectAttributes) {
         Optional<ProlongementPret> prolongementOpt = prolongementPretService.findById(id);

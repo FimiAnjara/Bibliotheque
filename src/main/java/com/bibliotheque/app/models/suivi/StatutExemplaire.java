@@ -17,11 +17,7 @@ public class StatutExemplaire {
     
     public enum Statut {
         DISPONIBLE(1, "Disponible"),
-        EMPRUNTE(2, "Emprunté"),
-        RESERVE(3, "Réservé"),
-        EN_REPARATION(4, "En réparation"),
-        PERDU(5, "Perdu"),
-        HORS_SERVICE(6, "Hors service");
+        EMPRUNTE(0, "Emprunté");
         
         private final int code;
         private final String libelle;

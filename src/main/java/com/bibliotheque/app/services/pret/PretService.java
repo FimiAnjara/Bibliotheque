@@ -54,14 +54,19 @@ public class PretService {
         if (hasActivePenalite) {
             throw new Exception("L'adhérent a une pénalité active à cette date.");
         }
-        // Vérifier quota de prêt
-        List<Pret> pretsActifs = pretRepository.findByAdherentAndDateRetourEffectuerIsNull(pret.getAdherent());
-        ConfigurationQuota config = configurationQuotaService.findByProfil(pret.getAdherent().getProfil());
-        if (config == null) {
-            throw new Exception("Aucune configuration de quota trouvée pour ce profil.");
-        }
-        if (pretsActifs.size() >= config.getQuotaPret()) {
-            throw new Exception("Quota de prêt dépassé.");
+        // Vérifier quota de prêt uniquement pour les prêts Domicile
+        if (pret.getTypePret() == Pret.TypePret.Domicile) {
+            List<Pret> pretsActifs = pretRepository.findByAdherentAndDateRetourEffectuerIsNull(pret.getAdherent());
+            long pretsDomicileActifs = pretsActifs.stream()
+                .filter(p -> p.getTypePret() == Pret.TypePret.Domicile)
+                .count();
+            ConfigurationQuota config = configurationQuotaService.findByProfil(pret.getAdherent().getProfil());
+            if (config == null) {
+                throw new Exception("Aucune configuration de quota trouvée pour ce profil.");
+            }
+            if (pretsDomicileActifs >= config.getQuotaPret()) {
+                throw new Exception("Quota de prêt dépassé.");
+            }
         }
         // Vérifier abonnement valide
         List<Abonnement> abonnements = pret.getAdherent().getAbonnements();

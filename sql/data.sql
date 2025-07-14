@@ -1,9 +1,9 @@
 -- Active: 1736646695640@@127.0.0.1@5432@bibliotheque_webdyn
 -- Profils
-INSERT INTO profil (id, nom, quota_max, duree_max_pret) VALUES
-  (1, 'etudiant', 5, 30),
-  (2, 'professeur', 10, 60),
-  (3, 'particulier', 3, 15);
+INSERT INTO profil (id, nom) VALUES
+  (1, 'etudiant'),
+  (2, 'professeur'),
+  (3, 'particulier');
 
 -- Utilisateurs (3 adherents, 1 personnel)
 INSERT INTO utilisateur (id, nom, prenom, date_naissance, email, address, password, telephone) VALUES
@@ -99,15 +99,15 @@ INSERT INTO statut_exemplaire (exemplaire_id, statut, date_changement, admin_id,
 -- TDF1-002 : Disponible
 (5, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible'),
 -- SDA1-001 : Réservé
-(6, 3, '2024-01-20 16:45:00', 4, 'Exemplaire réservé pour un cours'),
+(6, 1, '2024-01-20 16:45:00', 4, 'Exemplaire réservé pour un cours'),
 -- SDA1-002 : Disponible
 (7, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible'),
 -- 1984-001 : Perdu
-(8, 5, '2024-01-05 11:20:00', 4, 'Exemplaire signalé comme perdu'),
+(8, 1, '2024-01-05 11:20:00', 4, 'Exemplaire signalé comme perdu'),
 -- LM1-001 : Disponible
 (9, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible'),
 -- LM1-002 : Hors service
-(10, 6, '2024-01-12 13:30:00', 4, 'Exemplaire hors service - état dégradé'),
+(10, 1, '2024-01-12 13:30:00', 4, 'Exemplaire hors service - état dégradé'),
 -- OP1-001 : Disponible
 (11, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible');
 
@@ -123,7 +123,7 @@ INSERT INTO reservation (date_reservation, date_expiration, date_souhaiter, adhe
 ('2024-01-15 10:00:00', '2024-01-22 10:00:00', '2024-01-20 14:00:00', 1, 1),
 ('2024-01-16 14:30:00', '2024-01-23 14:30:00', '2024-01-21 16:00:00', 1, 3),
 -- Bob (professeur) a 1 réservation active sur 5 autorisées
-('2024-01-17 09:15:00', '2024-01-24 09:15:00', '2024-01-22 10:00:00', 2, 5),
+('2024-01-17 09:15:00', '2024-01-24 09:15:00', '2024-01-22 10:00:00', 2, 5);
 -- Claire (particulière) a 0 réservation active sur 2 autorisées
 -- (pas de réservation pour tester le quota disponible)
 
