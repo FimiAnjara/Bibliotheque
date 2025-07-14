@@ -146,6 +146,14 @@
                     </a>
                 </li>
 
+                <!-- Menu Types de pénalité -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/personnel/type-penalite}"
+                       th:classappend="${activePage == 'type-penalite'} ? 'active'">
+                        <i class="fas fa-gavel me-2"></i>Types de pénalité
+                    </a>
+                </li>
+
                 <li class="nav-item mt-3">
                     <a class="nav-link text-danger" th:href="@{/logout}">
                         <i class="fas fa-sign-out-alt me-2"></i>Déconnexion

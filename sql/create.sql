@@ -206,6 +206,7 @@ CREATE TABLE type_penalite (
     id SERIAL PRIMARY KEY,
     code VARCHAR(50) UNIQUE NOT NULL,
     description TEXT NOT NULL,
+    retard_jours INTEGER NOT NULL,
     duree_jours INTEGER NOT NULL
 );
 
