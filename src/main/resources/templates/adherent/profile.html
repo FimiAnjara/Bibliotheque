@@ -164,7 +164,7 @@
                                         <div class="col-md-4 text-md-end">
                                             <span class="emprunt-status status-en-cours">
                                                 <i class="fas fa-clock me-1"></i>
-                                                À retourner avant le <span th:text="${#temporals.format(pret.dateRetourPrevu, 'dd/MM/yyyy')}">Date</span>
+                                                À retourner avant le <span th:text="${#temporals.format(dateRetourPrevueEffective[pret.id], 'dd/MM/yyyy')}">Date</span>
                                             </span>
                                         </div>
                                     </div>

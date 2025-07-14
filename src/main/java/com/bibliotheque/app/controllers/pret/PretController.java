@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import jakarta.servlet.http.HttpSession;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/personnel/pret")
@@ -34,9 +35,13 @@ public class PretController {
     // Liste des prêts non rendus et validés
     @GetMapping("/non-rendu")
     public String pretsNonRendus(Model model) {
-        // On ne prend que les prêts validés (présence d'une Validation avec validationStatus=true)
         List<Pret> pretsNonRendus = pretService.findNonRendusEtValides();
+        Map<Long, java.time.LocalDateTime> dateRetourPrevueEffective = new java.util.HashMap<>();
+        for (Pret pret : pretsNonRendus) {
+            dateRetourPrevueEffective.put(pret.getId(), pretService.getDateRetourPrevueEffective(pret.getId()));
+        }
         model.addAttribute("pretsNonRendus", pretsNonRendus);
+        model.addAttribute("dateRetourPrevueEffective", dateRetourPrevueEffective);
         return "personnel/pret-non-rendu";
     }
 

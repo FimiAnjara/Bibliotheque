@@ -97,4 +97,17 @@ public class PretService {
             )
             .toList();
     }
+
+    public java.time.LocalDateTime getDateRetourPrevueEffective(Long pretId) {
+        Optional<Pret> pretOpt = findById(pretId);
+        if (pretOpt.isEmpty()) return null;
+        Pret pret = pretOpt.get();
+        java.util.List<Validation> validations = validationService.findAll();
+        return validations.stream()
+            .filter(v -> v.getProlongement() != null && v.getProlongement().getPret().getId().equals(pretId) && Boolean.TRUE.equals(v.getValidationStatus()))
+            .sorted((v1, v2) -> v2.getDate().compareTo(v1.getDate()))
+            .map(v -> v.getProlongement().getDateRetourPrevu())
+            .findFirst()
+            .orElse(pret.getDateRetourPrevu());
+    }
 } 

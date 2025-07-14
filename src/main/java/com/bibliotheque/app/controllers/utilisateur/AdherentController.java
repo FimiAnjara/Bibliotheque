@@ -70,17 +70,6 @@ public class AdherentController {
     @Autowired
     private ValidationService validationService;
 
-    private java.time.LocalDateTime getDateRetourPrevueEffective(Pret pret) {
-        // Cherche le dernier prolongement validé pour ce prêt
-        java.util.List<Validation> validations = validationService.findAll();
-        return validations.stream()
-            .filter(v -> v.getProlongement() != null && v.getProlongement().getPret().getId().equals(pret.getId()) && Boolean.TRUE.equals(v.getValidationStatus()))
-            .sorted((v1, v2) -> v2.getDate().compareTo(v1.getDate()))
-            .map(v -> v.getProlongement().getDateRetourPrevu())
-            .findFirst()
-            .orElse(pret.getDateRetourPrevu());
-    }
-
     @GetMapping("/home")
     public String home(Model model, HttpSession session) {
         Utilisateur user = (Utilisateur) session.getAttribute("user");
@@ -112,6 +101,12 @@ public class AdherentController {
                 disponibiliteMap.put(livre.getId(), livreInfo);
             }
             model.addAttribute("disponibiliteMap", disponibiliteMap);
+            
+            Map<Long, java.time.LocalDateTime> dateRetourPrevueEffective = new HashMap<>();
+            for (Pret pret : empruntsEnCours) {
+                dateRetourPrevueEffective.put(pret.getId(), pretService.getDateRetourPrevueEffective(pret.getId()));
+            }
+            model.addAttribute("dateRetourPrevueEffective", dateRetourPrevueEffective);
             
             return "adherent/home";
         }
@@ -177,6 +172,11 @@ public class AdherentController {
             
             List<Pret> empruntsEnCours = pretService.findByAdherentAndDateRetourEffectuerIsNull(adherent);
             model.addAttribute("empruntsEnCours", empruntsEnCours);
+            Map<Long, java.time.LocalDateTime> dateRetourPrevueEffective = new HashMap<>();
+            for (Pret pret : empruntsEnCours) {
+                dateRetourPrevueEffective.put(pret.getId(), pretService.getDateRetourPrevueEffective(pret.getId()));
+            }
+            model.addAttribute("dateRetourPrevueEffective", dateRetourPrevueEffective);
             
             List<Pret> historiqueEmprunts = pretService.findByAdherentOrderByDatePretDesc(adherent);
             model.addAttribute("historiqueEmprunts", historiqueEmprunts);
@@ -427,7 +427,7 @@ public String notifications(Model model, HttpSession session) {
         for (Pret pret : pretsEnCours) {
             boolean hasNonValide = prolongementPretService.hasNonValideProlongement(pret);
             pretAvecProlongementNonValide.put(pret.getId(), hasNonValide);
-            dateRetourPrevueEffective.put(pret.getId(), getDateRetourPrevueEffective(pret));
+            dateRetourPrevueEffective.put(pret.getId(), pretService.getDateRetourPrevueEffective(pret.getId()));
         }
         model.addAttribute("pretsEnCours", pretsEnCours);
         model.addAttribute("pretAvecProlongementNonValide", pretAvecProlongementNonValide);
@@ -454,6 +454,8 @@ public String notifications(Model model, HttpSession session) {
             return "redirect:/adherent/prets";
         }
         model.addAttribute("pret", pret);
+        model.addAttribute("user", user);
+        model.addAttribute("dateRetourPrevueEffective", pretService.getDateRetourPrevueEffective(pretId));
         return "adherent/demande-prolongement";
     }
 

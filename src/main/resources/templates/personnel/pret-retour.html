@@ -39,7 +39,7 @@
                             <li class="list-group-item"><strong>Adhérent :</strong> <span th:text="${pret.adherent != null ? pret.adherent.numeroAdherent : ''}"></span></li>
                             <li class="list-group-item"><strong>Exemplaire :</strong> <span th:text="${pret.exemplaire != null ? pret.exemplaire.reference : ''}"></span></li>
                             <li class="list-group-item"><strong>Date de prêt :</strong> <span th:text="${#temporals.format(pret.datePret, 'dd/MM/yyyy')}"></span></li>
-                            <li class="list-group-item"><strong>Date retour prévue :</strong> <span th:text="${#temporals.format(pret.dateRetourPrevu, 'dd/MM/yyyy')}"></span></li>
+                            <li class="list-group-item"><strong>Date retour prévue :</strong> <span th:text="${#temporals.format(dateRetourPrevueEffective, 'dd/MM/yyyy')}"></span></li>
                         </ul>
                     </div>
                 </div>
