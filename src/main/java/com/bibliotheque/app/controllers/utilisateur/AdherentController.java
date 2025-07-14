@@ -3,22 +3,36 @@ package com.bibliotheque.app.controllers.utilisateur;
 import com.bibliotheque.app.models.utilisateur.Adherent;
 import com.bibliotheque.app.models.utilisateur.Utilisateur;
 import com.bibliotheque.app.models.pret.Pret;
+import com.bibliotheque.app.models.pret.Reservation;
 import com.bibliotheque.app.models.bibliographie.Livre;
+import com.bibliotheque.app.models.bibliographie.Exemplaire;
 import com.bibliotheque.app.services.utilisateur.AdherentService;
 import com.bibliotheque.app.services.pret.PretService;
+import com.bibliotheque.app.services.pret.ReservationService;
 import com.bibliotheque.app.services.bibliographie.LivreService;
+import com.bibliotheque.app.services.bibliographie.ExemplaireService;
+import com.bibliotheque.app.repositories.bibliographie.ExemplaireRepository;
+import com.bibliotheque.app.services.suivi.NotificationService;
+import com.bibliotheque.app.models.suivi.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/adherent")
@@ -32,6 +46,18 @@ public class AdherentController {
     
     @Autowired
     private LivreService livreService;
+    
+    @Autowired
+    private ReservationService reservationService;
+    
+    @Autowired
+    private ExemplaireService exemplaireService;
+    
+    @Autowired
+    private ExemplaireRepository exemplaireRepository;
+    
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("/home")
     public String home(Model model, HttpSession session) {
@@ -153,9 +179,232 @@ public class AdherentController {
             }
             model.addAttribute("disponibiliteMap", disponibiliteMap);
             
+            // Récupérer le nombre de notifications non lues
+            long notificationsNonLues = notificationService.countByUtilisateurAndEstLuFalse(user);
+            model.addAttribute("notificationsNonLues", notificationsNonLues);
+            
             return "adherent/profile";
         }
         
         return "redirect:/";
+    }
+    
+    @GetMapping("/livre/{livreId}/exemplaires")
+    @ResponseBody
+    public List<Map<String, Object>> getExemplairesDisponibles(@PathVariable Long livreId, HttpSession session) {
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            return new ArrayList<>();
+        }
+        
+        Optional<Livre> livreOpt = livreService.findById(livreId);
+        if (!livreOpt.isPresent()) {
+            return new ArrayList<>();
+        }
+        
+        Livre livre = livreOpt.get();
+        List<Exemplaire> exemplaires = exemplaireRepository.findByLivre(livre);
+        
+        return exemplaires.stream()
+            .filter(exemplaire -> exemplaireService.getCurrentStatut(exemplaire).getCode() == 1) // Disponible
+            .map(exemplaire -> {
+                Map<String, Object> exemplaireInfo = new HashMap<>();
+                exemplaireInfo.put("id", exemplaire.getId());
+                exemplaireInfo.put("reference", exemplaire.getReference());
+                exemplaireInfo.put("dateAcquisition", exemplaire.getDateAcquisition());
+                return exemplaireInfo;
+            })
+            .collect(Collectors.toList());
+    }
+    
+    @GetMapping("/quota-reservation")
+    @ResponseBody
+    public Map<String, Object> getQuotaReservation(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "Utilisateur non connecté");
+            return response;
+        }
+        
+        Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
+        if (!adherentOpt.isPresent()) {
+            response.put("success", false);
+            response.put("message", "Adhérent non trouvé");
+            return response;
+        }
+        
+        Adherent adherent = adherentOpt.get();
+        ReservationService.ReservationQuotaInfo quotaInfo = reservationService.getQuotaInfo(adherent);
+        
+        response.put("success", true);
+        response.put("quotaMax", quotaInfo.getQuotaMax());
+        response.put("reservationsActives", quotaInfo.getReservationsActives());
+        response.put("reservationsRestantes", quotaInfo.getReservationsRestantes());
+        response.put("peutReserver", quotaInfo.peutReserver());
+        
+        return response;
+    }
+    
+    @PostMapping("/reserver")
+    @ResponseBody
+    public Map<String, Object> reserverLivre(@RequestBody Map<String, Object> request, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "Utilisateur non connecté");
+            return response;
+        }
+        
+        try {
+            Long exemplaireId = Long.parseLong(request.get("exemplaireId").toString());
+            String dateSouhaiterStr = request.get("dateSouhaiter").toString();
+            
+            Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
+            if (!adherentOpt.isPresent()) {
+                response.put("success", false);
+                response.put("message", "Adhérent non trouvé");
+                return response;
+            }
+            
+            Optional<Exemplaire> exemplaireOpt = exemplaireService.findById(exemplaireId);
+            if (!exemplaireOpt.isPresent()) {
+                response.put("success", false);
+                response.put("message", "Exemplaire non trouvé");
+                return response;
+            }
+            
+            Adherent adherent = adherentOpt.get();
+            
+            // Vérifier le quota de réservation
+            if (!reservationService.peutReserver(adherent)) {
+                ReservationService.ReservationQuotaInfo quotaInfo = reservationService.getQuotaInfo(adherent);
+                response.put("success", false);
+                response.put("message", "Quota de réservation atteint. Vous avez " + quotaInfo.getReservationsActives() + 
+                           " réservation(s) active(s) sur " + quotaInfo.getQuotaMax() + " autorisée(s).");
+                response.put("quotaInfo", quotaInfo);
+                return response;
+            }
+            
+            LocalDateTime dateSouhaiter = LocalDateTime.parse(dateSouhaiterStr);
+            Exemplaire exemplaire = exemplaireOpt.get();
+            
+            Reservation reservation = reservationService.createReservation(adherent, exemplaire, dateSouhaiter);
+            
+            response.put("success", true);
+            response.put("message", "Réservation créée avec succès");
+            response.put("reservationId", reservation.getId());
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Erreur lors de la réservation: " + e.getMessage());
+        }
+        
+        return response;
+    }
+    
+    @GetMapping("/notifications")
+public String notifications(Model model, HttpSession session) {
+    Utilisateur user = (Utilisateur) session.getAttribute("user");
+    if (user == null) {
+        return "redirect:/";
+    }
+    
+    List<Notification> notifications = notificationService.findByUtilisateurOrderByDateCreationDesc(user);
+    
+    // Vérification nullité
+    if (notifications == null) {
+        notifications = new ArrayList<>();
+    }
+    
+    // Debug amélioré
+    System.out.println("Notifications pour utilisateur {}: {}" + user.getId() + notifications);
+    
+    // Calcul des stats
+    long totalNotifications = notifications.size();
+    long notificationsNonLues = notifications.stream()
+        .filter(n -> n != null && !n.getEstLu())
+        .count();
+    
+    model.addAttribute("notifications", notifications);
+    model.addAttribute("user", user);
+    model.addAttribute("totalNotifications", totalNotifications);
+    model.addAttribute("notificationsNonLues", notificationsNonLues);
+    model.addAttribute("notificationsLues", totalNotifications - notificationsNonLues);
+    
+    return "adherent/notifications";
+}
+    
+    @PostMapping("/notification/{notificationId}/marquer-lu")
+    @ResponseBody
+    public Map<String, Object> marquerNotificationLue(@PathVariable Long notificationId, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "Utilisateur non connecté");
+            return response;
+        }
+        
+        try {
+            Optional<Notification> notificationOpt = notificationService.findById(notificationId);
+            if (!notificationOpt.isPresent()) {
+                response.put("success", false);
+                response.put("message", "Notification non trouvée");
+                return response;
+            }
+            
+            Notification notification = notificationOpt.get();
+            
+            // Vérifier que la notification appartient à l'utilisateur connecté
+            if (!notification.getUtilisateur().getId().equals(user.getId())) {
+                response.put("success", false);
+                response.put("message", "Accès non autorisé");
+                return response;
+            }
+            
+            notification.setEstLu(true);
+            notificationService.save(notification);
+            
+            response.put("success", true);
+            response.put("message", "Notification marquée comme lue");
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Erreur lors du marquage : " + e.getMessage());
+        }
+        
+        return response;
+    }
+    
+    @GetMapping("/notifications/non-lues")
+    @ResponseBody
+    public Map<String, Object> getNotificationsNonLues(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "Utilisateur non connecté");
+            return response;
+        }
+        
+        try {
+            List<Notification> notificationsNonLues = notificationService.findByUtilisateurAndEstLuFalseOrderByDateCreationDesc(user);
+            response.put("success", true);
+            response.put("count", notificationsNonLues.size());
+            response.put("notifications", notificationsNonLues);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Erreur lors de la récupération : " + e.getMessage());
+        }
+        
+        return response;
     }
 } 

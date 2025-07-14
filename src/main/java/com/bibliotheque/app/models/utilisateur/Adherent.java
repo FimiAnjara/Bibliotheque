@@ -13,14 +13,8 @@ import com.bibliotheque.app.models.suivi.Penalite;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Adherent {
-    @Id
-    private Long id;
-
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "id")
-    private Utilisateur utilisateur;
+@ToString(exclude = {"profil", "abonnements", "prets", "reservations", "penalites"})
+public class Adherent extends Utilisateur {
 
     @Column(unique = true, nullable = false)
     private String numeroAdherent;

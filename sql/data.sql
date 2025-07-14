@@ -1,3 +1,4 @@
+-- Active: 1736646695640@@127.0.0.1@5432@bibliotheque_webdyn
 -- Profils
 INSERT INTO profil (id, nom, quota_max, duree_max_pret) VALUES
   (1, 'etudiant', 5, 30),
@@ -109,4 +110,43 @@ INSERT INTO statut_exemplaire (exemplaire_id, statut, date_changement, admin_id,
 (10, 6, '2024-01-12 13:30:00', 4, 'Exemplaire hors service - état dégradé'),
 -- OP1-001 : Disponible
 (11, 1, '2024-01-01 10:00:00', 4, 'Exemplaire disponible');
+
+-- Configurations de quota par profil
+INSERT INTO configuration_quota (libelle, profil_id, duree_max_pret, quota_pret, quota_reservation, date_configuration) VALUES
+('Configuration Étudiant', 1, 30, 5, 3, '2024-01-01 10:00:00'),
+('Configuration Professeur', 2, 60, 10, 5, '2024-01-01 10:00:00'),
+('Configuration Particulier', 3, 15, 3, 2, '2024-01-01 10:00:00');
+
+-- Réservations de test
+INSERT INTO reservation (date_reservation, date_expiration, date_souhaiter, adherent_id, exemplaire_id) VALUES
+-- Alice (étudiante) a 2 réservations actives sur 3 autorisées
+('2024-01-15 10:00:00', '2024-01-22 10:00:00', '2024-01-20 14:00:00', 1, 1),
+('2024-01-16 14:30:00', '2024-01-23 14:30:00', '2024-01-21 16:00:00', 1, 3),
+-- Bob (professeur) a 1 réservation active sur 5 autorisées
+('2024-01-17 09:15:00', '2024-01-24 09:15:00', '2024-01-22 10:00:00', 2, 5),
+-- Claire (particulière) a 0 réservation active sur 2 autorisées
+-- (pas de réservation pour tester le quota disponible)
+
+-- Validations de test (pour tester les réservations validées/annulées)
+INSERT INTO validation (reservation_id, date, validation_status, admin_id) VALUES
+-- Une réservation validée (ne doit pas apparaître dans les réservations actives)
+(1, '2024-01-18 10:00:00', true, 4),
+-- Une réservation annulée (ne doit pas apparaître dans les réservations actives)
+(2, '2024-01-19 14:00:00', false, 4);
+
+
+ALTER TABLE notification ALTER COLUMN message TYPE TEXT;
+SELECT * FROM notification;
+-- Prêts de test (pour les notifications)
+INSERT INTO pret (date_pret, date_retour_prevu, adherent_id, exemplaire_id, type_pret, notes) VALUES
+('2024-01-20 14:00:00', '2024-02-19 14:00:00', 1, 1, 'Domicile', 'Prêt créé à partir de la réservation #1');
+
+-- Notifications de test
+INSERT INTO notification (utilisateur_id, message, date_creation, est_lu, pret_id, reservation_id) VALUES
+-- Notification pour Alice (étudiante) - réservation validée
+(1, 'Votre réservation pour le livre "Harry Potter à l''école des sorciers" (exemplaire HP1-001) a été validée et transformée en prêt. Prêt #1 - Date de prêt : 20/01/2024 à 14:00 - Date de retour prévue : 19/02/2024 à 14:00. Merci de respecter la date de retour pour éviter des pénalités.', '2024-01-18 10:00:00', false, 1, 1),
+-- Notification pour Bob (professeur) - réservation annulée
+(2, 'Votre réservation pour le livre "Le Trône de Fer" (exemplaire TDF1-002) a été annulée par le personnel de la bibliothèque.', '2024-01-19 14:00:00', false, NULL, 2),
+-- Notification lue pour Alice
+(1, 'Rappel : Votre livre "Harry Potter à l''école des sorciers" doit être retourné avant le 19/02/2024.', '2024-01-20 09:00:00', true, 1, NULL);
 

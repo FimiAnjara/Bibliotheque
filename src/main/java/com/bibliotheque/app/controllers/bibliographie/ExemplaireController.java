@@ -56,9 +56,9 @@ public class ExemplaireController {
                 (com.bibliotheque.app.models.utilisateur.Utilisateur) session.getAttribute("user");
             
             if (user != null) {
-                Optional<Personnel> personnelOpt = personnelService.findById(user.getId());
-                if (personnelOpt.isPresent()) {
-                    exemplaireService.saveWithDefaultStatus(exemplaire, personnelOpt.get());
+                Personnel personnel = personnelService.findById(user.getId());
+                if (personnel != null) {
+                    exemplaireService.saveWithDefaultStatus(exemplaire, personnel);
                     redirectAttributes.addFlashAttribute("success", "Exemplaire ajouté avec succès ! Statut initial : Disponible");
                 } else {
                     exemplaireService.save(exemplaire);

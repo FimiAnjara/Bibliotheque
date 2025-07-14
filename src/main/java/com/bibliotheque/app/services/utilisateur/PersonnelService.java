@@ -17,8 +17,8 @@ public class PersonnelService {
         return personnelRepository.findAll(); 
     }
     
-    public Optional<Personnel> findById(Long id) { 
-        return personnelRepository.findById(id); 
+    public Personnel findById(Long id) { 
+        return personnelRepository.findById(id).orElse(null); 
     }
     
     public Personnel save(Personnel personnel) { 

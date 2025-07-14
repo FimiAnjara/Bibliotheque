@@ -11,6 +11,7 @@ import com.bibliotheque.app.models.pret.Reservation;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"utilisateur", "pret", "reservation"})
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +19,9 @@ public class Notification {
 
     private String message;
     private LocalDateTime dateCreation;
+
+    @Column(name = "est_lu", nullable = false)
+    private Boolean estLu = false;
 
     @ManyToOne
     @JoinColumn(name = "utilisateur_id")

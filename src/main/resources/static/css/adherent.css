@@ -23,7 +23,7 @@ body {
 .page-header, .hero-section {
     background: linear-gradient(135deg, #164575 0%, #5a8ab4 100%);
     color: white;
-    padding: 3rem 0;
+    padding:  6%;
     margin-bottom: 3rem;
 }
 
@@ -286,4 +286,94 @@ body {
 .stats-card {
     text-align: center;
     height: 100%;
+}
+
+/* Styles pour la modal de réservation */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    border-bottom: none;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem 2rem;
+}
+
+.form-select, .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.btn-group .btn {
+    border-radius: 8px;
+}
+
+.btn-group .btn:not(:last-child) {
+    margin-right: 0.5rem;
+}
+
+/* Styles pour les informations de quota */
+.quota-info {
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+.quota-info .alert {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.quota-info .badge {
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    border-radius: 20px;
+}
+
+.quota-info .badge.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.quota-info .badge.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+    color: #212529;
+}
+
+.quota-info .badge.bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+}
+
+/* Styles pour les boutons de réservation désactivés */
+.reservation-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #6c757d !important;
+    border-color: #6c757d !important;
+}
+
+.reservation-btn:disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
 } 

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Réservations Actives - Personnel</title>
+    <!-- CSS (Bootstrap + Font Awesome) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/personnel.css}">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 p-0">
+               <div th:insert="~{fragments/personnel-sidebar :: personnel-sidebar}"></div>
+            </div>
+            
+            <!-- Contenu principal -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Header -->
+                <div class="simple-header fade-in">
+                    <div class="logo">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                    <div>
+                        <h1>Réservations Actives</h1>
+                        <p class="mb-0">Gestion des réservations en attente</p>
+                    </div>
+                </div>
+
+                <!-- Alertes -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Contenu principal -->
+                <div class="content-wrapper fade-in">
+                    <!-- Statistiques -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-clock text-white fs-4"></i>
+                                    </div>
+                                    <h5 class="card-title">Réservations en attente</h5>
+                                    <p class="card-text text-muted" th:text="${reservations.size()} + ' réservation(s)'">0 réservation(s)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des réservations -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>Réservations Actives
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div th:if="${reservations.isEmpty()}" class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <h4>Aucune réservation active</h4>
+                                <p class="text-muted">Il n'y a actuellement aucune réservation en attente de validation.</p>
+                            </div>
+                            
+                            <div th:if="${!reservations.isEmpty()}" class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Adhérent</th>
+                                            <th>Livre</th>
+                                            <th>Exemplaire</th>
+                                            <th>Date de réservation</th>
+                                            <th>Date souhaitée</th>
+                                            <th>Expiration</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="reservation : ${reservations}">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="user-avatar-small me-3">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong th:text="${reservation.adherent.prenom + ' ' + reservation.adherent.nom}">
+                                                            Nom Adhérent
+                                                        </strong>
+                                                        <br>
+                                                        <small class="text-muted" th:text="${reservation.adherent.numeroAdherent}">
+                                                            Numéro
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong th:text="${reservation.exemplaire.livre.titre}">Titre du livre</strong>
+                                                    <br>
+                                                    <small class="text-muted" th:if="${reservation.exemplaire.livre.auteur != null}">
+                                                        <span th:text="${reservation.exemplaire.livre.auteur.nom + ' ' + reservation.exemplaire.livre.auteur.prenom}">Auteur</span>
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary" th:text="${reservation.exemplaire.reference}">Référence</span>
+                                            </td>
+                                            <td>
+                                                <span th:text="${#temporals.format(reservation.dateReservation, 'dd/MM/yyyy HH:mm')}">
+                                                    Date réservation
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span th:text="${#temporals.format(reservation.dateSouhaiter, 'dd/MM/yyyy HH:mm')}">
+                                                    Date souhaitée
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span th:text="${#temporals.format(reservation.dateExpiration, 'dd/MM/yyyy HH:mm')}">
+                                                    Date expiration
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-success btn-sm" 
+                                                            th:data-reservation-id="${reservation.id}"
+                                                            onclick="validerReservation(this)">
+                                                        <i class="fas fa-check me-1"></i>Valider
+                                                    </button>
+                                                    <button class="btn btn-danger btn-sm" 
+                                                            th:data-reservation-id="${reservation.id}"
+                                                            onclick="annulerReservation(this)">
+                                                        <i class="fas fa-times me-1"></i>Annuler
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script pour les actions -->
+    <script>
+        function validerReservation(button) {
+            const reservationId = button.getAttribute('data-reservation-id');
+            
+            if (confirm('Êtes-vous sûr de vouloir valider cette réservation ?')) {
+                fetch(`/personnel/reservation/valider/${reservationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.text())
+                .then(result => {
+                    alert(result);
+                    if (result.includes('succès')) {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de la validation de la réservation');
+                });
+            }
+        }
+        
+        function annulerReservation(button) {
+            const reservationId = button.getAttribute('data-reservation-id');
+            
+            if (confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
+                fetch(`/personnel/reservation/annuler/${reservationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.text())
+                .then(result => {
+                    alert(result);
+                    if (result.includes('succès')) {
+                        // Recharger la page pour mettre à jour la liste
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de l\'annulation de la réservation');
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

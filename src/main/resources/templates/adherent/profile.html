@@ -12,55 +12,7 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/adherent/home">
-                <i class="fas fa-book-open me-2"></i>Bibliothèque
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/adherent/home">
-                            <i class="fas fa-home me-1"></i>Accueil
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/adherent/livres">
-                            <i class="fas fa-books me-1"></i>Livres
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/adherent/profile">
-                            <i class="fas fa-user me-1"></i>Mon Profil
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="navbar-nav">
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>
-                            <span th:text="${user.prenom + ' ' + user.nom}">Utilisateur</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/adherent/profile">
-                                <i class="fas fa-user me-2"></i>Mon Profil
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
-                            </a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <div th:replace="fragments/adherent-navbar :: adherent-navbar(activePage='profile', notificationsNonLues=${notificationsNonLues}, user=${user})"></div>
 
     <!-- Page Header -->
     <section class="page-header">

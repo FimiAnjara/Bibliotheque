@@ -138,6 +138,14 @@
                     </div>
                 </li>
 
+                <!-- Menu Réservations -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/personnel/reservation/list}"
+                       th:classappend="${activePage == 'reservation'} ? 'active'">
+                        <i class="fas fa-bookmark me-2"></i>Réservations
+                    </a>
+                </li>
+
                 <li class="nav-item mt-3">
                     <a class="nav-link text-danger" th:href="@{/logout}">
                         <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
