@@ -5,12 +5,14 @@ import com.bibliotheque.app.models.utilisateur.Utilisateur;
 import com.bibliotheque.app.models.pret.Pret;
 import com.bibliotheque.app.models.pret.Reservation;
 import com.bibliotheque.app.models.pret.ProlongementPret;
+import com.bibliotheque.app.models.pret.Validation;
 import com.bibliotheque.app.models.bibliographie.Livre;
 import com.bibliotheque.app.models.bibliographie.Exemplaire;
 import com.bibliotheque.app.services.utilisateur.AdherentService;
 import com.bibliotheque.app.services.pret.PretService;
 import com.bibliotheque.app.services.pret.ReservationService;
 import com.bibliotheque.app.services.pret.ProlongementPretService;
+import com.bibliotheque.app.services.pret.ValidationService;
 import com.bibliotheque.app.services.bibliographie.LivreService;
 import com.bibliotheque.app.services.bibliographie.ExemplaireService;
 import com.bibliotheque.app.repositories.bibliographie.ExemplaireRepository;
@@ -64,6 +66,20 @@ public class AdherentController {
 
     @Autowired
     private ProlongementPretService prolongementPretService;
+
+    @Autowired
+    private ValidationService validationService;
+
+    private java.time.LocalDateTime getDateRetourPrevueEffective(Pret pret) {
+        // Cherche le dernier prolongement validé pour ce prêt
+        java.util.List<Validation> validations = validationService.findAll();
+        return validations.stream()
+            .filter(v -> v.getProlongement() != null && v.getProlongement().getPret().getId().equals(pret.getId()) && Boolean.TRUE.equals(v.getValidationStatus()))
+            .sorted((v1, v2) -> v2.getDate().compareTo(v1.getDate()))
+            .map(v -> v.getProlongement().getDateRetourPrevu())
+            .findFirst()
+            .orElse(pret.getDateRetourPrevu());
+    }
 
     @GetMapping("/home")
     public String home(Model model, HttpSession session) {
@@ -407,12 +423,15 @@ public String notifications(Model model, HttpSession session) {
         Adherent adherent = adherentOpt.get();
         List<Pret> pretsEnCours = pretService.findByAdherentAndDateRetourEffectuerIsNull(adherent);
         Map<Long, Boolean> pretAvecProlongementNonValide = new HashMap<>();
+        Map<Long, java.time.LocalDateTime> dateRetourPrevueEffective = new HashMap<>();
         for (Pret pret : pretsEnCours) {
             boolean hasNonValide = prolongementPretService.hasNonValideProlongement(pret);
             pretAvecProlongementNonValide.put(pret.getId(), hasNonValide);
+            dateRetourPrevueEffective.put(pret.getId(), getDateRetourPrevueEffective(pret));
         }
         model.addAttribute("pretsEnCours", pretsEnCours);
         model.addAttribute("pretAvecProlongementNonValide", pretAvecProlongementNonValide);
+        model.addAttribute("dateRetourPrevueEffective", dateRetourPrevueEffective);
         model.addAttribute("user", user);
         return "adherent/prets";
     }

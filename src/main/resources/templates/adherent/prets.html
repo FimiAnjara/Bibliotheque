@@ -27,9 +27,9 @@
                 <tr th:each="pret : ${pretsEnCours}">
                     <td th:text="${pret.exemplaire != null ? pret.exemplaire.reference : ''}"></td>
                     <td th:text="${#temporals.format(pret.datePret, 'dd/MM/yyyy')}"></td>
-                    <td th:text="${#temporals.format(pret.dateRetourPrevu, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${#temporals.format(dateRetourPrevueEffective[pret.id], 'dd/MM/yyyy')}"></td>
                     <td>
-                        <span th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), pret.dateRetourPrevu.toLocalDate())}"></span>
+                        <span th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), dateRetourPrevueEffective[pret.id].toLocalDate())}"></span>
                     </td>
                     <td>
                         <a th:if="${!pretAvecProlongementNonValide[pret.id]}"

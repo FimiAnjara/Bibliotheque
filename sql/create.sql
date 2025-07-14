@@ -252,7 +252,7 @@ CREATE TABLE notification (
     CONSTRAINT fk_notification_pret FOREIGN KEY (pret_id) REFERENCES pret(id),
     CONSTRAINT fk_notification_reservation FOREIGN KEY (reservation_id) REFERENCES reservation(id)
 );
-
+ALTER Table notification ALTER COLUMN message TYPE TEXT;
 
 -- ==========================================
 -- TABLES ANNEXES
