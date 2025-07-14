@@ -20,3 +20,4 @@ BEGIN
         RAISE NOTICE 'Des statuts existent déjà, aucune action nécessaire';
     END IF;
 END $$; 
+
