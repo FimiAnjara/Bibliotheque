@@ -12,11 +12,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.bibliotheque.app.models.pret.Pret;
+import com.bibliotheque.app.services.pret.PretService;
+import com.bibliotheque.app.services.utilisateur.AdherentService;
+import com.bibliotheque.app.services.pret.ValidationService;
+import com.bibliotheque.app.models.pret.Validation;
 
 @Controller
 @RequestMapping("/personnel/exemplaire")
@@ -34,6 +40,15 @@ public class ExemplaireController {
     @Autowired
     private PersonnelService personnelService;
 
+    @Autowired
+    private PretService pretService;
+    
+    @Autowired
+    private AdherentService adherentService;
+
+    @Autowired
+    private ValidationService validationService;
+
     @GetMapping("/add")
     public String showAddExemplaireForm(Model model) {
         model.addAttribute("exemplaire", new Exemplaire());
@@ -47,11 +62,9 @@ public class ExemplaireController {
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
         try {
-            // Récupérer le livre
             Livre livre = livreService.findById(livreId).orElse(null);
             if (livre != null) exemplaire.setLivre(livre);
             
-            // Récupérer l'utilisateur connecté
             com.bibliotheque.app.models.utilisateur.Utilisateur user = 
                 (com.bibliotheque.app.models.utilisateur.Utilisateur) session.getAttribute("user");
             
@@ -65,7 +78,6 @@ public class ExemplaireController {
                     redirectAttributes.addFlashAttribute("success", "Exemplaire ajouté avec succès !");
                 }
             } else {
-                // Fallback si l'utilisateur n'est pas connecté
                 exemplaireService.save(exemplaire);
                 redirectAttributes.addFlashAttribute("success", "Exemplaire ajouté avec succès !");
             }
@@ -82,8 +94,7 @@ public class ExemplaireController {
                                  @RequestParam(required = false) Integer statut,
                                  Model model) {
         List<Exemplaire> exemplaires = exemplaireService.findAll();
-        
-        // Filtrer les exemplaires selon les critères de recherche
+
         if (search != null && !search.trim().isEmpty()) {
             String searchLower = search.toLowerCase();
             exemplaires = exemplaires.stream()
@@ -137,5 +148,79 @@ public class ExemplaireController {
         model.addAttribute("statut", statut);
         
         return "personnel/exemplaire/list";
+    }
+
+    @GetMapping("/preter/{exemplaireId}")
+    public String showPretForm(@PathVariable Long exemplaireId, Model model, HttpSession session) {
+        com.bibliotheque.app.models.utilisateur.Utilisateur user = (com.bibliotheque.app.models.utilisateur.Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/";
+        }
+        Optional<Exemplaire> exemplaireOpt = exemplaireService.findById(exemplaireId);
+        if (exemplaireOpt.isEmpty()) {
+            model.addAttribute("error", "Exemplaire non trouvé");
+            return "redirect:/personnel/exemplaire/list";
+        }
+        Exemplaire exemplaire = exemplaireOpt.get();
+        if (exemplaireService.getCurrentStatut(exemplaire).getCode() != 1) { // 1 = DISPONIBLE
+            model.addAttribute("error", "Exemplaire non disponible pour le prêt");
+            return "redirect:/personnel/exemplaire/list";
+        }
+        model.addAttribute("exemplaire", exemplaire);
+        return "personnel/exemplaire/pret";
+    }
+
+    @PostMapping("/preter/{exemplaireId}")
+    public String effectuerPret(@PathVariable Long exemplaireId,
+                                @RequestParam Long adherentId,
+                                @RequestParam(required = false) String notes,
+                                @RequestParam(defaultValue = "Domicile") String typePret,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+        com.bibliotheque.app.models.utilisateur.Utilisateur user = (com.bibliotheque.app.models.utilisateur.Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "Utilisateur non connecté");
+            return "redirect:/personnel/exemplaire/list";
+        }
+        Optional<Exemplaire> exemplaireOpt = exemplaireService.findById(exemplaireId);
+        if (exemplaireOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Exemplaire non trouvé");
+            return "redirect:/personnel/exemplaire/list";
+        }
+        Exemplaire exemplaire = exemplaireOpt.get();
+        if (exemplaireService.getCurrentStatut(exemplaire).getCode() != 1) {
+            redirectAttributes.addFlashAttribute("error", "Exemplaire non disponible pour le prêt");
+            return "redirect:/personnel/exemplaire/list";
+        }
+        Optional<com.bibliotheque.app.models.utilisateur.Adherent> adherentOpt =
+            adherentService.findById(adherentId);
+        if (adherentOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Adhérent non trouvé");
+            return "redirect:/personnel/exemplaire/list";
+        }
+        com.bibliotheque.app.models.utilisateur.Adherent adherent = adherentOpt.get();
+        Pret pret = new Pret();
+        pret.setAdherent(adherent);
+        pret.setExemplaire(exemplaire);
+        pret.setDatePret(java.time.LocalDateTime.now());
+        pret.setTypePret(Pret.TypePret.valueOf(typePret));
+        pret.setNotes(notes);
+        pret.setDateRetourPrevu(pretService.getDateRetourPrevue(pret.getDatePret(), adherent));
+        try {
+            pretService.saveWithChecks(pret);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/personnel/exemplaire/preter/" + exemplaireId;
+        }
+        Validation validation = new com.bibliotheque.app.models.pret.Validation();
+        validation.setPret(pret);
+        validation.setValidationStatus(true);
+        validation.setDate(java.time.LocalDateTime.now());
+        validation.setAdmin(personnelService.findById(user.getId()));
+        validationService.save(validation);
+        Personnel personnel = personnelService.findById(user.getId());
+        statutExemplaireService.changeStatut(exemplaire, StatutExemplaire.Statut.EMPRUNTE, personnel, "Prêt effectué");
+        redirectAttributes.addFlashAttribute("success", "Prêt effectué avec succès !");
+        return "redirect:/personnel/exemplaire/list";
     }
 } 

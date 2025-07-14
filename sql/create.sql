@@ -146,6 +146,7 @@ CREATE TABLE abonnement (
     CHECK (date_fin > date_debut),
     CHECK (date_paiement <= date_debut)
 );
+
 CREATE TABLE pret (
     id SERIAL PRIMARY KEY,
     date_pret TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
