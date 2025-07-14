@@ -11,6 +11,7 @@ import com.bibliotheque.app.models.utilisateur.Adherent;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"admin", "typePenalite", "adherent"})
 public class Penalite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

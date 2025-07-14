@@ -151,6 +151,13 @@
                     <a class="nav-link" th:href="@{/personnel/pret/non-rendu}"
                        th:classappend="${activePage == 'pret-non-rendu'} ? 'active'">
                         <i class="fas fa-clock me-2"></i>Prêts non rendus
+                     </a>
+                </li>
+                <!-- Menu Types de pénalité -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/personnel/type-penalite}"
+                       th:classappend="${activePage == 'type-penalite'} ? 'active'">
+                        <i class="fas fa-gavel me-2"></i>Types de pénalité
                     </a>
                 </li>
 

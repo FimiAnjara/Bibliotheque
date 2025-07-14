@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Gestion des types de pénalité</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/personnel.css}">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 p-0">
+            <div th:insert="~{fragments/personnel-sidebar :: personnel-sidebar}"></div>
+        </div>
+        <!-- Contenu principal -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <div class="container mt-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-gavel me-2"></i>Gestion des types de pénalité</h4>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                        <!-- Formulaire d'ajout/édition -->
+                        <form th:action="@{/personnel/type-penalite}" th:object="${typePenaliteForm}" method="post" class="row g-3 mb-4">
+                            <input type="hidden" th:field="*{id}" />
+                            <div class="col-md-3">
+                                <label for="code" class="form-label">Code</label>
+                                <input type="text" class="form-control" id="code" th:field="*{code}" required placeholder="Code unique">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="description" class="form-label">Description</label>
+                                <input type="text" class="form-control" id="description" th:field="*{description}" required placeholder="Description">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="dureeJours" class="form-label">Durée (jours)</label>
+                                <input type="number" class="form-control" id="dureeJours" th:field="*{dureeJours}" min="1" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="retardJours" class="form-label">Retard (jours)</label>
+                                <input type="number" class="form-control" id="retardJours" th:field="*{retardJours}" min="1" required>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-success me-2">
+                                    <i class="fas fa-save me-1"></i><span th:text="${typePenaliteForm.id} != null ? 'Mettre à jour' : 'Ajouter'"></span>
+                                </button>
+                                <a th:if="${typePenaliteForm.id} != null" th:href="@{/personnel/type-penalite}" class="btn btn-secondary">Annuler</a>
+                            </div>
+                        </form>
+                        <!-- Tableau des types de pénalité -->
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Description</th>
+                                        <th>Durée (jours)</th>
+                                        <th>Retard (jours)</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="typePenalite : ${typePenalites}">
+                                        <td th:text="${typePenalite.code}"></td>
+                                        <td th:text="${typePenalite.description}"></td>
+                                        <td th:text="${typePenalite.dureeJours}"></td>
+                                        <td th:text="${typePenalite.retardJours}"></td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/personnel/type-penalite/edit/{id}(id=${typePenalite.id})}" class="btn btn-outline-primary btn-sm" title="Éditer"><i class="fas fa-edit"></i></a>
+                                                <a th:href="@{/personnel/type-penalite/delete/{id}(id=${typePenalite.id})}" class="btn btn-outline-danger btn-sm ms-1" title="Supprimer" onclick="return confirm('Supprimer ce type de pénalité ?');"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(typePenalites)}">
+                                        <td colspan="4" class="text-center text-muted">Aucun type de pénalité enregistré.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
