@@ -39,19 +39,18 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestParam String email, @RequestParam String password, Model model, HttpSession session) {
-        Optional<Utilisateur> userOpt = utilisateurRepository.findByEmail(email);
-        if (userOpt.isPresent()) {
-            Utilisateur user = userOpt.get();
+        Utilisateur user = utilisateurRepository.findByEmail(email).orElse(null);
+        if (user != null) {
             if (user.getPassword().equals(password)) {
                 // Vérifier si Adherent
-                Optional<Adherent> adherentOpt = adherentRepository.findById(user.getId());
-                if (adherentOpt.isPresent()) {
+                Adherent adherent = adherentRepository.findById(user.getId()).orElse(null);
+                if (adherent != null) {
                     session.setAttribute("user", user);
                     return "redirect:/adherent/home";
                 }
                 // Vérifier si Personnel
-                Optional<Personnel> personnelOpt = personnelRepository.findById(user.getId());
-                if (personnelOpt.isPresent()) {
+                Personnel personnel = personnelRepository.findById(user.getId()).orElse(null);
+                if (personnel != null) {
                     session.setAttribute("user", user);
                     return "redirect:/personnel/home";
                 }

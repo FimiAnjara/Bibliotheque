@@ -38,7 +38,10 @@ public class TypePenaliteController {
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable Long id, Model model) {
         List<TypePenalite> typePenalites = typePenaliteService.findAll();
-        TypePenalite typePenalite = typePenaliteService.findById(id).orElse(new TypePenalite());
+        TypePenalite typePenalite = typePenaliteService.findById(id).orElse(null);
+        if (typePenalite == null) {
+            typePenalite = new TypePenalite();
+        }
         model.addAttribute("typePenalites", typePenalites);
         model.addAttribute("typePenaliteForm", typePenalite);
         return "personnel/type-penalite";

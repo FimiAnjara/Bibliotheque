@@ -62,7 +62,7 @@ public class ExemplaireController {
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
         try {
-            Livre livre = livreService.findById(livreId).orElse(null);
+            Livre livre = livreService.findById(livreId);
             if (livre != null) exemplaire.setLivre(livre);
             
             com.bibliotheque.app.models.utilisateur.Utilisateur user = 
@@ -156,12 +156,11 @@ public class ExemplaireController {
         if (user == null) {
             return "redirect:/";
         }
-        Optional<Exemplaire> exemplaireOpt = exemplaireService.findById(exemplaireId);
-        if (exemplaireOpt.isEmpty()) {
+        Exemplaire exemplaire = exemplaireService.findById(exemplaireId);
+        if (exemplaire == null) {
             model.addAttribute("error", "Exemplaire non trouvé");
             return "redirect:/personnel/exemplaire/list";
         }
-        Exemplaire exemplaire = exemplaireOpt.get();
         if (exemplaireService.getCurrentStatut(exemplaire).getCode() != 1) { // 1 = DISPONIBLE
             model.addAttribute("error", "Exemplaire non disponible pour le prêt");
             return "redirect:/personnel/exemplaire/list";
@@ -182,23 +181,20 @@ public class ExemplaireController {
             redirectAttributes.addFlashAttribute("error", "Utilisateur non connecté");
             return "redirect:/personnel/exemplaire/list";
         }
-        Optional<Exemplaire> exemplaireOpt = exemplaireService.findById(exemplaireId);
-        if (exemplaireOpt.isEmpty()) {
+        Exemplaire exemplaire = exemplaireService.findById(exemplaireId);
+        if (exemplaire == null) {
             redirectAttributes.addFlashAttribute("error", "Exemplaire non trouvé");
             return "redirect:/personnel/exemplaire/list";
         }
-        Exemplaire exemplaire = exemplaireOpt.get();
         if (exemplaireService.getCurrentStatut(exemplaire).getCode() != 1) {
             redirectAttributes.addFlashAttribute("error", "Exemplaire non disponible pour le prêt");
             return "redirect:/personnel/exemplaire/list";
         }
-        Optional<com.bibliotheque.app.models.utilisateur.Adherent> adherentOpt =
-            adherentService.findById(adherentId);
-        if (adherentOpt.isEmpty()) {
+        com.bibliotheque.app.models.utilisateur.Adherent adherent = adherentService.findById(adherentId);
+        if (adherent == null) {
             redirectAttributes.addFlashAttribute("error", "Adhérent non trouvé");
             return "redirect:/personnel/exemplaire/list";
         }
-        com.bibliotheque.app.models.utilisateur.Adherent adherent = adherentOpt.get();
         Pret pret = new Pret();
         pret.setAdherent(adherent);
         pret.setExemplaire(exemplaire);

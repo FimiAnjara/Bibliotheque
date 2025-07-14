@@ -14,7 +14,7 @@ public class AdherentService {
     private AdherentRepository adherentRepository;
 
     public List<Adherent> findAll() { return adherentRepository.findAll(); }
-    public Optional<Adherent> findById(Long id) { return adherentRepository.findById(id); }
+    public Adherent findById(Long id) { return adherentRepository.findById(id).orElse(null); }
     public Adherent save(Adherent adherent) { return adherentRepository.save(adherent); }
     public void deleteById(Long id) { adherentRepository.deleteById(id); }
 } 

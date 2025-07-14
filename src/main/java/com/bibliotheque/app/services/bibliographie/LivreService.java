@@ -23,7 +23,7 @@ public class LivreService {
     private ExemplaireRepository exemplaireRepository;
 
     public List<Livre> findAll() { return livreRepository.findAll(); }
-    public Optional<Livre> findById(Long id) { return livreRepository.findById(id); }
+    public Livre findById(Long id) { return livreRepository.findById(id).orElse(null); }
     public Livre save(Livre livre) { return livreRepository.save(livre); }
     public void deleteById(Long id) { livreRepository.deleteById(id); }
     

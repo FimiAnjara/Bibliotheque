@@ -24,8 +24,8 @@ public class ExemplaireService {
         return exemplaireRepository.findAll(); 
     }
     
-    public Optional<Exemplaire> findById(Long id) { 
-        return exemplaireRepository.findById(id); 
+    public Exemplaire findById(Long id) { 
+        return exemplaireRepository.findById(id).orElse(null); 
     }
     
     public Exemplaire save(Exemplaire exemplaire) { 
