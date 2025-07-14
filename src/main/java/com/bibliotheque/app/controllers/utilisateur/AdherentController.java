@@ -72,15 +72,12 @@ public class AdherentController {
             model.addAttribute("adherent", adherent);
             model.addAttribute("user", user);
             
-            // Récupérer les emprunts en cours
             List<Pret> empruntsEnCours = pretService.findByAdherentAndDateRetourEffectuerIsNull(adherent);
             model.addAttribute("empruntsEnCours", empruntsEnCours);
             
-            // Récupérer l'historique des emprunts
             List<Pret> historiqueEmprunts = pretService.findByAdherentOrderByDatePretDesc(adherent);
             model.addAttribute("historiqueEmprunts", historiqueEmprunts);
             
-            // Créer une map pour stocker les informations de disponibilité des livres empruntés
             Map<Long, Map<String, Integer>> disponibiliteMap = new HashMap<>();
             for (Pret pret : empruntsEnCours) {
                 Livre livre = pret.getExemplaire().getLivre();
@@ -128,7 +125,6 @@ public class AdherentController {
         model.addAttribute("categorie", categorie);
         model.addAttribute("auteur", auteur);
         
-        // Créer une map pour stocker les informations de disponibilité
         Map<Long, Map<String, Integer>> disponibiliteMap = new HashMap<>();
         for (Livre livre : livres) {
             int exemplairesDisponibles = livreService.getNombreExemplairesDisponibles(livre);
@@ -157,15 +153,12 @@ public class AdherentController {
             model.addAttribute("adherent", adherent);
             model.addAttribute("user", user);
             
-            // Récupérer les emprunts en cours
             List<Pret> empruntsEnCours = pretService.findByAdherentAndDateRetourEffectuerIsNull(adherent);
             model.addAttribute("empruntsEnCours", empruntsEnCours);
             
-            // Récupérer l'historique des emprunts
             List<Pret> historiqueEmprunts = pretService.findByAdherentOrderByDatePretDesc(adherent);
             model.addAttribute("historiqueEmprunts", historiqueEmprunts);
             
-            // Créer une map pour stocker les informations de disponibilité des livres empruntés
             Map<Long, Map<String, Integer>> disponibiliteMap = new HashMap<>();
             for (Pret pret : empruntsEnCours) {
                 Livre livre = pret.getExemplaire().getLivre();
@@ -179,7 +172,6 @@ public class AdherentController {
             }
             model.addAttribute("disponibiliteMap", disponibiliteMap);
             
-            // Récupérer le nombre de notifications non lues
             long notificationsNonLues = notificationService.countByUtilisateurAndEstLuFalse(user);
             model.addAttribute("notificationsNonLues", notificationsNonLues);
             
@@ -221,30 +213,28 @@ public class AdherentController {
     @ResponseBody
     public Map<String, Object> getQuotaReservation(HttpSession session) {
         Map<String, Object> response = new HashMap<>();
-        
         Utilisateur user = (Utilisateur) session.getAttribute("user");
         if (user == null) {
             response.put("success", false);
             response.put("message", "Utilisateur non connecté");
             return response;
         }
-        
         Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
         if (!adherentOpt.isPresent()) {
             response.put("success", false);
             response.put("message", "Adhérent non trouvé");
             return response;
         }
-        
         Adherent adherent = adherentOpt.get();
-        ReservationService.ReservationQuotaInfo quotaInfo = reservationService.getQuotaInfo(adherent);
-        
+        int quotaMax = reservationService.getQuotaReservation(adherent);
+        int reservationsActives = reservationService.getReservationsActives(adherent);
+        int reservationsRestantes = quotaMax - reservationsActives;
+        boolean peutReserver = reservationsActives < quotaMax;
         response.put("success", true);
-        response.put("quotaMax", quotaInfo.getQuotaMax());
-        response.put("reservationsActives", quotaInfo.getReservationsActives());
-        response.put("reservationsRestantes", quotaInfo.getReservationsRestantes());
-        response.put("peutReserver", quotaInfo.peutReserver());
-        
+        response.put("quotaMax", quotaMax);
+        response.put("reservationsActives", reservationsActives);
+        response.put("reservationsRestantes", reservationsRestantes);
+        response.put("peutReserver", peutReserver);
         return response;
     }
     
@@ -252,58 +242,52 @@ public class AdherentController {
     @ResponseBody
     public Map<String, Object> reserverLivre(@RequestBody Map<String, Object> request, HttpSession session) {
         Map<String, Object> response = new HashMap<>();
-        
         Utilisateur user = (Utilisateur) session.getAttribute("user");
         if (user == null) {
             response.put("success", false);
             response.put("message", "Utilisateur non connecté");
             return response;
         }
-        
         try {
             Long exemplaireId = Long.parseLong(request.get("exemplaireId").toString());
             String dateSouhaiterStr = request.get("dateSouhaiter").toString();
-            
             Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
             if (!adherentOpt.isPresent()) {
                 response.put("success", false);
                 response.put("message", "Adhérent non trouvé");
                 return response;
             }
-            
             Optional<Exemplaire> exemplaireOpt = exemplaireService.findById(exemplaireId);
             if (!exemplaireOpt.isPresent()) {
                 response.put("success", false);
                 response.put("message", "Exemplaire non trouvé");
                 return response;
             }
-            
-            Adherent adherent = adherentOpt.get();
-            
-            // Vérifier le quota de réservation
+            Adherent adherent = adherentOpt.get();  
             if (!reservationService.peutReserver(adherent)) {
-                ReservationService.ReservationQuotaInfo quotaInfo = reservationService.getQuotaInfo(adherent);
+                int quotaMax = reservationService.getQuotaReservation(adherent);
+                int reservationsActives = reservationService.getReservationsActives(adherent);
+                int reservationsRestantes = quotaMax - reservationsActives;
+                boolean peutReserver = reservationsActives < quotaMax;
                 response.put("success", false);
-                response.put("message", "Quota de réservation atteint. Vous avez " + quotaInfo.getReservationsActives() + 
-                           " réservation(s) active(s) sur " + quotaInfo.getQuotaMax() + " autorisée(s).");
-                response.put("quotaInfo", quotaInfo);
+                response.put("message", "Quota de réservation atteint. Vous avez " + reservationsActives + 
+                           " réservation(s) active(s) sur " + quotaMax + " autorisée(s).");
+                response.put("quotaMax", quotaMax);
+                response.put("reservationsActives", reservationsActives);
+                response.put("reservationsRestantes", reservationsRestantes);
+                response.put("peutReserver", peutReserver);
                 return response;
             }
-            
             LocalDateTime dateSouhaiter = LocalDateTime.parse(dateSouhaiterStr);
             Exemplaire exemplaire = exemplaireOpt.get();
-            
             Reservation reservation = reservationService.createReservation(adherent, exemplaire, dateSouhaiter);
-            
             response.put("success", true);
             response.put("message", "Réservation créée avec succès");
             response.put("reservationId", reservation.getId());
-            
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Erreur lors de la réservation: " + e.getMessage());
         }
-        
         return response;
     }
     
@@ -316,15 +300,12 @@ public String notifications(Model model, HttpSession session) {
     
     List<Notification> notifications = notificationService.findByUtilisateurOrderByDateCreationDesc(user);
     
-    // Vérification nullité
     if (notifications == null) {
         notifications = new ArrayList<>();
     }
     
-    // Debug amélioré
     System.out.println("Notifications pour utilisateur {}: {}" + user.getId() + notifications);
     
-    // Calcul des stats
     long totalNotifications = notifications.size();
     long notificationsNonLues = notifications.stream()
         .filter(n -> n != null && !n.getEstLu())
@@ -361,7 +342,6 @@ public String notifications(Model model, HttpSession session) {
             
             Notification notification = notificationOpt.get();
             
-            // Vérifier que la notification appartient à l'utilisateur connecté
             if (!notification.getUtilisateur().getId().equals(user.getId())) {
                 response.put("success", false);
                 response.put("message", "Accès non autorisé");
