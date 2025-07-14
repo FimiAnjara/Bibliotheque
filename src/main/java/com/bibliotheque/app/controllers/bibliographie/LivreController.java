@@ -41,7 +41,7 @@ public class LivreController {
                           @RequestParam Long editeurId,
                           RedirectAttributes redirectAttributes) {
         try {
-            Auteur auteur = auteurService.findById(auteurId).orElse(null);
+            Auteur auteur = auteurService.findById(auteurId);
             Editeur editeur = editeurService.findById(editeurId).orElse(null);
             
             

@@ -36,26 +36,20 @@ public class StatutExemplaireController {
         if (user == null) {
             return "redirect:/";
         }
-        
         Personnel personnel = personnelService.findById(user.getId());
         if (personnel == null) {
             return "redirect:/";
         }
-        
-        Optional<Exemplaire> exemplaireOpt = exemplaireService.findById(exemplaireId);
-        if (exemplaireOpt.isEmpty()) {
+        Exemplaire exemplaire = exemplaireService.findById(exemplaireId);
+        if (exemplaire == null) {
             return "redirect:/personnel/exemplaire/list";
         }
-        
-        Exemplaire exemplaire = exemplaireOpt.get();
         StatutExemplaire.Statut currentStatut = exemplaireService.getCurrentStatut(exemplaire);
-        
         model.addAttribute("exemplaire", exemplaire);
         model.addAttribute("currentStatut", currentStatut);
         model.addAttribute("statuts", StatutExemplaire.Statut.values());
         model.addAttribute("activePage", "exemplaire");
         model.addAttribute("activeSubPage", "exemplaire-list");
-        
         return "personnel/statut-exemplaire/change";
     }
     
@@ -71,30 +65,23 @@ public class StatutExemplaireController {
         if (user == null) {
             return "redirect:/";
         }
-        
         Personnel personnel = personnelService.findById(user.getId());
         if (personnel == null) {
             return "redirect:/";
         }
-        
-        Optional<Exemplaire> exemplaireOpt = exemplaireService.findById(exemplaireId);
-        if (exemplaireOpt.isEmpty()) {
+        Exemplaire exemplaire = exemplaireService.findById(exemplaireId);
+        if (exemplaire == null) {
             redirectAttributes.addFlashAttribute("error", "Exemplaire non trouvé.");
             return "redirect:/personnel/exemplaire/list";
         }
-        
         try {
-            Exemplaire exemplaire = exemplaireOpt.get();
             StatutExemplaire.Statut statut = StatutExemplaire.Statut.fromCode(nouveauStatut);
-            
             statutExemplaireService.changeStatut(exemplaire, statut, personnel, notes);
-            
             redirectAttributes.addFlashAttribute("success", 
                 "Statut de l'exemplaire " + exemplaire.getReference() + " changé vers " + statut.getLibelle() + " avec succès !");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Erreur lors du changement de statut : " + e.getMessage());
         }
-        
         return "redirect:/personnel/exemplaire/list";
     }
 }

@@ -18,6 +18,10 @@ import com.bibliotheque.app.services.bibliographie.ExemplaireService;
 import com.bibliotheque.app.repositories.bibliographie.ExemplaireRepository;
 import com.bibliotheque.app.services.suivi.NotificationService;
 import com.bibliotheque.app.models.suivi.Notification;
+import com.bibliotheque.app.services.gestion.AbonnementService;
+import com.bibliotheque.app.services.gestion.TypeAbonnementService;
+import com.bibliotheque.app.models.gestion.Abonnement;
+import com.bibliotheque.app.models.gestion.TypeAbonnement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -70,16 +74,19 @@ public class AdherentController {
     @Autowired
     private ValidationService validationService;
 
+    @Autowired
+    private AbonnementService abonnementService;
+    @Autowired
+    private TypeAbonnementService typeAbonnementService;
+
     @GetMapping("/home")
     public String home(Model model, HttpSession session) {
         Utilisateur user = (Utilisateur) session.getAttribute("user");
         if (user == null) {
             return "redirect:/";
         }
-        
-        Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
-        if (adherentOpt.isPresent()) {
-            Adherent adherent = adherentOpt.get();
+        Adherent adherent = adherentService.findById(user.getId());
+        if (adherent != null) {
             model.addAttribute("adherent", adherent);
             model.addAttribute("user", user);
             
@@ -163,10 +170,8 @@ public class AdherentController {
         if (user == null) {
             return "redirect:/";
         }
-        
-        Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
-        if (adherentOpt.isPresent()) {
-            Adherent adherent = adherentOpt.get();
+        Adherent adherent = adherentService.findById(user.getId());
+        if (adherent != null) {
             model.addAttribute("adherent", adherent);
             model.addAttribute("user", user);
             
@@ -211,12 +216,11 @@ public class AdherentController {
             return new ArrayList<>();
         }
         
-        Optional<Livre> livreOpt = livreService.findById(livreId);
-        if (!livreOpt.isPresent()) {
+        Livre livre = livreService.findById(livreId);
+        if (livre == null) {
             return new ArrayList<>();
         }
         
-        Livre livre = livreOpt.get();
         List<Exemplaire> exemplaires = exemplaireRepository.findByLivre(livre);
         
         return exemplaires.stream()
@@ -241,13 +245,12 @@ public class AdherentController {
             response.put("message", "Utilisateur non connecté");
             return response;
         }
-        Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
-        if (!adherentOpt.isPresent()) {
+        Adherent adherent = adherentService.findById(user.getId());
+        if (adherent == null) {
             response.put("success", false);
             response.put("message", "Adhérent non trouvé");
             return response;
         }
-        Adherent adherent = adherentOpt.get();
         int quotaMax = reservationService.getQuotaReservation(adherent);
         int reservationsActives = reservationService.getReservationsActives(adherent);
         int reservationsRestantes = quotaMax - reservationsActives;
@@ -273,35 +276,19 @@ public class AdherentController {
         try {
             Long exemplaireId = Long.parseLong(request.get("exemplaireId").toString());
             String dateSouhaiterStr = request.get("dateSouhaiter").toString();
-            Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
-            if (!adherentOpt.isPresent()) {
+            Adherent adherent = adherentService.findById(user.getId());
+            if (adherent == null) {
                 response.put("success", false);
                 response.put("message", "Adhérent non trouvé");
                 return response;
             }
-            Optional<Exemplaire> exemplaireOpt = exemplaireService.findById(exemplaireId);
-            if (!exemplaireOpt.isPresent()) {
+            Exemplaire exemplaire = exemplaireService.findById(exemplaireId);
+            if (exemplaire == null) {
                 response.put("success", false);
                 response.put("message", "Exemplaire non trouvé");
                 return response;
             }
-            Adherent adherent = adherentOpt.get();  
-            if (!reservationService.peutReserver(adherent)) {
-                int quotaMax = reservationService.getQuotaReservation(adherent);
-                int reservationsActives = reservationService.getReservationsActives(adherent);
-                int reservationsRestantes = quotaMax - reservationsActives;
-                boolean peutReserver = reservationsActives < quotaMax;
-                response.put("success", false);
-                response.put("message", "Quota de réservation atteint. Vous avez " + reservationsActives + 
-                           " réservation(s) active(s) sur " + quotaMax + " autorisée(s).");
-                response.put("quotaMax", quotaMax);
-                response.put("reservationsActives", reservationsActives);
-                response.put("reservationsRestantes", reservationsRestantes);
-                response.put("peutReserver", peutReserver);
-                return response;
-            }
             LocalDateTime dateSouhaiter = LocalDateTime.parse(dateSouhaiterStr);
-            Exemplaire exemplaire = exemplaireOpt.get();
             Reservation reservation = reservationService.createReservation(adherent, exemplaire, dateSouhaiter);
             response.put("success", true);
             response.put("message", "Réservation créée avec succès");
@@ -355,14 +342,12 @@ public String notifications(Model model, HttpSession session) {
         }
         
         try {
-            Optional<Notification> notificationOpt = notificationService.findById(notificationId);
-            if (!notificationOpt.isPresent()) {
+            Notification notification = notificationService.findById(notificationId).orElse(null);
+            if (notification == null) {
                 response.put("success", false);
                 response.put("message", "Notification non trouvée");
                 return response;
             }
-            
-            Notification notification = notificationOpt.get();
             
             if (!notification.getUtilisateur().getId().equals(user.getId())) {
                 response.put("success", false);
@@ -416,11 +401,10 @@ public String notifications(Model model, HttpSession session) {
         if (user == null) {
             return "redirect:/";
         }
-        Optional<Adherent> adherentOpt = adherentService.findById(user.getId());
-        if (adherentOpt.isEmpty()) {
+        Adherent adherent = adherentService.findById(user.getId());
+        if (adherent == null) {
             return "redirect:/";
         }
-        Adherent adherent = adherentOpt.get();
         List<Pret> pretsEnCours = pretService.findByAdherentAndDateRetourEffectuerIsNull(adherent);
         Map<Long, Boolean> pretAvecProlongementNonValide = new HashMap<>();
         Map<Long, java.time.LocalDateTime> dateRetourPrevueEffective = new HashMap<>();
@@ -442,12 +426,11 @@ public String notifications(Model model, HttpSession session) {
         if (user == null) {
             return "redirect:/";
         }
-        Optional<Pret> pretOpt = pretService.findById(pretId);
-        if (pretOpt.isEmpty()) {
+        Pret pret = pretService.findById(pretId).orElse(null);
+        if (pret == null) {
             redirectAttributes.addFlashAttribute("error", "Prêt introuvable.");
             return "redirect:/adherent/prets";
         }
-        Pret pret = pretOpt.get();
         boolean hasNonValide = prolongementPretService.hasNonValideProlongement(pret);
         if (hasNonValide) {
             redirectAttributes.addFlashAttribute("error", "Vous avez déjà une demande de prolongement en attente de validation pour ce prêt.");
@@ -465,12 +448,11 @@ public String notifications(Model model, HttpSession session) {
         if (user == null) {
             return "redirect:/";
         }
-        Optional<Pret> pretOpt = pretService.findById(pretId);
-        if (pretOpt.isEmpty()) {
+        Pret pret = pretService.findById(pretId).orElse(null);
+        if (pret == null) {
             redirectAttributes.addFlashAttribute("error", "Prêt introuvable.");
             return "redirect:/adherent/prets";
         }
-        Pret pret = pretOpt.get();
         try {
             java.time.LocalDateTime nouvelleDateRetour = java.time.LocalDate.parse(nouvelleDateRetourStr).atStartOfDay();
             ProlongementPret prolongement = new ProlongementPret();
@@ -483,5 +465,57 @@ public String notifications(Model model, HttpSession session) {
             redirectAttributes.addFlashAttribute("error", "Erreur : " + e.getMessage());
         }
         return "redirect:/adherent/prets";
+    }
+
+    @GetMapping("/abonnement")
+    public String abonnementForm(Model model, HttpSession session) {
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/";
+        }
+        Adherent adherent = adherentService.findById(user.getId());
+        if (adherent == null) {
+            return "redirect:/";
+        }
+        List<TypeAbonnement> types = typeAbonnementService.findAll();
+        model.addAttribute("typesAbonnement", types);
+        model.addAttribute("abonnement", new Abonnement());
+        return "adherent/abonnement";
+    }
+
+    @PostMapping("/abonnement")
+    public String souscrireAbonnement(@RequestParam Long typeAbonnementId,
+                                      @RequestParam Double montantPaye,
+                                      @RequestParam(required = false) String datePaiement,
+                                      Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        Utilisateur user = (Utilisateur) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/";
+        }
+        Adherent adherent = adherentService.findById(user.getId());
+        if (adherent == null) {
+            redirectAttributes.addFlashAttribute("error", "Adhérent non trouvé");
+            return "redirect:/adherent/abonnement";
+        }
+        TypeAbonnement type = typeAbonnementService.findById(typeAbonnementId);
+        if (type == null) {
+            redirectAttributes.addFlashAttribute("error", "Type d'abonnement invalide");
+            return "redirect:/adherent/abonnement";
+        }
+        Abonnement abonnement = new Abonnement();
+        abonnement.setAdherent(adherent);
+        abonnement.setTypeAbonnement(type);
+        java.time.LocalDate now = java.time.LocalDate.now();
+        abonnement.setDateDebut(now);
+        abonnement.setDateFin(now.plusMonths(type.getDureeMois() != null ? type.getDureeMois() : 12));
+        abonnement.setMontantPaye(montantPaye);
+        if (datePaiement != null && !datePaiement.isEmpty()) {
+            abonnement.setDatePaiement(java.time.LocalDate.parse(datePaiement));
+        } else {
+            abonnement.setDatePaiement(now);
+        }
+        abonnementService.save(abonnement);
+        redirectAttributes.addFlashAttribute("success", "Abonnement souscrit avec succès !");
+        return "redirect:/adherent/profile";
     }
 } 

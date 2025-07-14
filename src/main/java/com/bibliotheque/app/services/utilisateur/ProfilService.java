@@ -14,7 +14,7 @@ public class ProfilService {
     private ProfilRepository profilRepository;
 
     public List<Profil> findAll() { return profilRepository.findAll(); }
-    public Optional<Profil> findById(Long id) { return profilRepository.findById(id); }
+    public Profil findById(Long id) { return profilRepository.findById(id).orElse(null); }
     public Profil save(Profil profil) { return profilRepository.save(profil); }
     public void deleteById(Long id) { profilRepository.deleteById(id); }
 } 

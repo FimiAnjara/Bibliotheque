@@ -61,23 +61,22 @@ public class PretController {
 
     @GetMapping("/retour/{id}")
     public String retourForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
-        Optional<Pret> pretOpt = pretService.findById(id);
-        if (pretOpt.isEmpty()) {
+        Pret pret = pretService.findById(id).orElse(null);
+        if (pret == null) {
             redirectAttributes.addFlashAttribute("error", "Prêt introuvable.");
             return "redirect:/personnel/pret/non-rendu";
         }
-        model.addAttribute("pret", pretOpt.get());
+        model.addAttribute("pret", pret);
         return "personnel/pret-retour";
     }
 
     @PostMapping("/retour/{id}")
     public String validerRetour(@PathVariable Long id, @RequestParam("dateRetour") String dateRetourStr, RedirectAttributes redirectAttributes, HttpSession session) {
-        Optional<Pret> pretOpt = pretService.findById(id);
-        if (pretOpt.isEmpty()) {
+        Pret pret = pretService.findById(id).orElse(null);
+        if (pret == null) {
             redirectAttributes.addFlashAttribute("error", "Prêt introuvable.");
             return "redirect:/personnel/pret/non-rendu";
         }
-        Pret pret = pretOpt.get();
         try {
             LocalDate dateRetour = LocalDate.parse(dateRetourStr);
             pret.setDateRetourEffectuer(dateRetour.atStartOfDay());

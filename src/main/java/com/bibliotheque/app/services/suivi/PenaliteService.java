@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PenaliteService {
@@ -17,7 +16,7 @@ public class PenaliteService {
     private PenaliteRepository penaliteRepository;
 
     public List<Penalite> findAll() { return penaliteRepository.findAll(); }
-    public Optional<Penalite> findById(Long id) { return penaliteRepository.findById(id); }
+    public Penalite findById(Long id) { return penaliteRepository.findById(id).orElse(null); }
     public Penalite save(Penalite penalite) { return penaliteRepository.save(penalite); }
     public void deleteById(Long id) { penaliteRepository.deleteById(id); }
 

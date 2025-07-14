@@ -14,7 +14,7 @@ public class AbonnementService {
     private AbonnementRepository abonnementRepository;
 
     public List<Abonnement> findAll() { return abonnementRepository.findAll(); }
-    public Optional<Abonnement> findById(Long id) { return abonnementRepository.findById(id); }
+    public Abonnement findById(Long id) { return abonnementRepository.findById(id).orElse(null); }
     public Abonnement save(Abonnement abonnement) { return abonnementRepository.save(abonnement); }
     public void deleteById(Long id) { abonnementRepository.deleteById(id); }
 } 

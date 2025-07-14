@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class StatutExemplaireService {
@@ -20,8 +19,8 @@ public class StatutExemplaireService {
         return statutExemplaireRepository.findAll(); 
     }
     
-    public Optional<StatutExemplaire> findById(Long id) { 
-        return statutExemplaireRepository.findById(id); 
+    public StatutExemplaire findById(Long id) { 
+        return statutExemplaireRepository.findById(id).orElse(null); 
     }
     
     public StatutExemplaire save(StatutExemplaire statutExemplaire) { 
@@ -36,8 +35,8 @@ public class StatutExemplaireService {
         return statutExemplaireRepository.findByExemplaireOrderByDateChangementDesc(exemplaire);
     }
     
-    public Optional<StatutExemplaire> findCurrentStatutByExemplaire(Exemplaire exemplaire) {
-        return statutExemplaireRepository.findCurrentStatutByExemplaire(exemplaire);
+    public StatutExemplaire findCurrentStatutByExemplaire(Exemplaire exemplaire) {
+        return statutExemplaireRepository.findCurrentStatutByExemplaire(exemplaire).orElse(null);
     }
     
     public StatutExemplaire changeStatut(Exemplaire exemplaire, StatutExemplaire.Statut nouveauStatut, 
@@ -53,8 +52,7 @@ public class StatutExemplaireService {
     }
     
     public StatutExemplaire.Statut getCurrentStatut(Exemplaire exemplaire) {
-        Optional<StatutExemplaire> currentStatut = findCurrentStatutByExemplaire(exemplaire);
-        return currentStatut.map(StatutExemplaire::getStatutEnum)
-                           .orElse(StatutExemplaire.Statut.DISPONIBLE);
+        StatutExemplaire currentStatut = findCurrentStatutByExemplaire(exemplaire);
+        return currentStatut != null ? currentStatut.getStatutEnum() : StatutExemplaire.Statut.DISPONIBLE;
     }
 } 

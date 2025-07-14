@@ -48,15 +48,22 @@ public class ReservationValidationService {
 
 
     public Boolean canValidateReservation(Reservation reservation) {
-        
+        // Vérifier validité abonnement
+        Adherent adherent = reservation.getAdherent();
+        java.time.LocalDate dateReservation = reservation.getDateSouhaiter().toLocalDate();
+        boolean hasValidAbonnement = adherent.getAbonnements() != null && adherent.getAbonnements().stream().anyMatch(a ->
+            a.getDateDebut() != null && a.getDateFin() != null &&
+            !dateReservation.isBefore(a.getDateDebut()) && !dateReservation.isAfter(a.getDateFin())
+        );
+        if (!hasValidAbonnement) {
+            return false;
+        }
         if (hasDateConflicts(reservation)) {
             return false;
         }
-        
         if (!checkPretQuota(reservation.getAdherent())) {
             return false;
         }
-        
         return true;
     }
 
