@@ -130,9 +130,8 @@ public class ReservationValidationService {
         validation.setDate(LocalDateTime.now());
         validation.setAdmin(personnel);
         
-        validationRepository.save(validation);
+        validationRepository.save(validation);      
         
-        // Créer une notification pour l'adhérent
         createNotificationForAdherent(pret, reservation);
         
         return pret;
