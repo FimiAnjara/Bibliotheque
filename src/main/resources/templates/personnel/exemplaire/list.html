@@ -168,6 +168,12 @@
                                                        title="Changer le statut">
                                                         <i class="fas fa-exchange-alt"></i>
                                                     </a>
+                                                    <a th:if="${statutsActuels != null and statutsActuels.get(exemplaire.id) != null and statutsActuels.get(exemplaire.id).code == 1}"
+                                                       th:href="@{/personnel/exemplaire/preter/{id}(id=${exemplaire.id})}"
+                                                       class="btn btn-success btn-sm ms-1"
+                                                       title="Prêter cet exemplaire">
+                                                        <i class="fas fa-handshake"></i> Prêter
+                                                    </a>
                                                 </div>
                                             </td>
                                         </tr>

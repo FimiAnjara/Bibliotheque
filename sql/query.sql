@@ -14,6 +14,8 @@ select*from pret;
 
 SELECT * FROM type_abonnement;
 
+SELECT * FROM validation;
+
 
 
 
