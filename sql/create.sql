@@ -154,7 +154,7 @@ CREATE TABLE pret (
     date_retour_effectuer TIMESTAMP,
     adherent_id INTEGER NOT NULL,
     exemplaire_id INTEGER NOT NULL,
-    type_pret VARCHAR(50) NOT NULL CHECK (type_pret IN ('Domicile', 'Sur place')),
+    type_pret VARCHAR(50) NOT NULL CHECK (type_pret IN ('Domicile', 'sur place')),
     notes TEXT,
     CONSTRAINT fk_pret_adherent FOREIGN KEY (adherent_id) REFERENCES adherent(id),
     CONSTRAINT fk_pret_exemplaire FOREIGN KEY (exemplaire_id) REFERENCES exemplaire(id),

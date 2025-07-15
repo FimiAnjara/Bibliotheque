@@ -11,6 +11,7 @@ import com.bibliotheque.app.services.gestion.AbonnementService;
 import com.bibliotheque.app.models.gestion.Abonnement;
 import com.bibliotheque.app.models.pret.Validation;
 import com.bibliotheque.app.services.pret.ValidationService;
+import com.bibliotheque.app.config.BibliothequeConfig;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class PretService {
 
     @Autowired
     private ValidationService validationService;
+
+    @Autowired
+    private BibliothequeConfig bibliothequeConfig;
 
     public List<Pret> findAll() { return pretRepository.findAll(); }
     public Optional<Pret> findById(Long id) { return pretRepository.findById(id); }
@@ -93,6 +97,10 @@ public class PretService {
         return datePret.plusDays(config.getDureeMaxPret());
     } 
 
+    public LocalDateTime getDateRetourPrevueSurPlace(LocalDateTime datePret) {
+        return datePret.with(bibliothequeConfig.getHeureFermeture());
+    }
+
     public List<Pret> findNonRendusEtValides() {
         List<Pret> tous = pretRepository.findAll();
         return tous.stream()
@@ -114,5 +122,9 @@ public class PretService {
             .map(v -> v.getProlongement().getDateRetourPrevu())
             .findFirst()
             .orElse(pret.getDateRetourPrevu());
+    }
+
+    public List<Pret> findPretsRendus() {
+        return pretRepository.findByDateRetourEffectuerIsNotNull();
     }
 } 

@@ -78,19 +78,21 @@ public class PretController {
             return "redirect:/personnel/pret/non-rendu";
         }
         try {
-            LocalDate dateRetour = LocalDate.parse(dateRetourStr);
-            pret.setDateRetourEffectuer(dateRetour.atStartOfDay());
+            LocalDateTime dateRetour = LocalDateTime.parse(dateRetourStr);
+            pret.setDateRetourEffectuer(dateRetour);
             pretService.save(pret);
-            com.bibliotheque.app.models.utilisateur.Utilisateur user = (com.bibliotheque.app.models.utilisateur.Utilisateur) session.getAttribute("user");
-            Personnel personnel = null;
-            if (user != null) {
-                personnel = personnelService.findById(user.getId());
+            Utilisateur user = (Utilisateur) session.getAttribute("user");
+            if (user == null) {
+                redirectAttributes.addFlashAttribute("error", "Utilisateur non connecté");
+                return "redirect:/personnel/pret/non-rendu";
             }
+            Personnel personnel = personnelService.findById(user.getId());
             Exemplaire exemplaire = pret.getExemplaire();
             statutExemplaireService.changeStatut(exemplaire, StatutExemplaire.Statut.DISPONIBLE, personnel, "Retour de prêt");
             java.time.LocalDateTime datePrevue = pretService.getDateRetourPrevueEffective(pret.getId());
             if (pret.getDateRetourEffectuer() != null && datePrevue != null && pret.getDateRetourEffectuer().isAfter(datePrevue)) {
                 long joursRetard = penaliteService.calculerJoursRetard(datePrevue, pret.getDateRetourEffectuer());
+                if (joursRetard > 0) {
                 List<TypePenalite> types = typePenaliteService.findAll();
                 TypePenalite type = penaliteService.getTypePenalitePourRetardOuDefaut(types, joursRetard);
                 Penalite penalite = new Penalite();
@@ -99,13 +101,10 @@ public class PretController {
                 penalite.setDateApplication(pret.getDateRetourEffectuer().toLocalDate());
                 penalite.setDateFin(penalite.getDateApplication().plusDays(type.getDureeJours() != null ? type.getDureeJours() : 7));
                 penalite.setNotes("Retard de " + joursRetard + " jours sur le prêt #" + pret.getId());
-                Utilisateur currentUser = (Utilisateur) session.getAttribute("user");
-                if (currentUser != null) {
-                    Personnel adminPersonnel = personnelService.findById(currentUser.getId());
-                    penalite.setAdmin(adminPersonnel);
-                }
+                penalite.setAdmin(personnel);
                 penaliteService.save(penalite);
                 redirectAttributes.addFlashAttribute("warning", "Retour en retard : pénalité appliquée (" + type.getDureeJours() + " jours)");
+                }
             } else {
                 redirectAttributes.addFlashAttribute("success", "Retour enregistré avec succès.");
             }
@@ -162,5 +161,12 @@ public class PretController {
         validationService.save(v);
         redirectAttributes.addFlashAttribute("success", validation ? "Prolongement validé." : "Prolongement refusé.");
         return "redirect:/personnel/pret/prolongements/attente";
+    }
+
+    @GetMapping("/rendu")
+    public String pretsRendus(Model model) {
+        List<Pret> pretsRendus = pretService.findPretsRendus();
+        model.addAttribute("pretsRendus", pretsRendus);
+        return "personnel/pret-rendu";
     }
 } 

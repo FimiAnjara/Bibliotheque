@@ -31,7 +31,7 @@ public class Pret {
     @Column(name = "date_retour_effectuer")
     private LocalDateTime dateRetourEffectuer;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = TypePretConverter.class)
     @Column(name = "type_pret", nullable = false)
     private TypePret typePret;
 
@@ -56,11 +56,40 @@ public class Pret {
     private List<Notification> notifications;
 
     public enum TypePret {
-    Domicile,
-    Sur_place;
+        Domicile("Domicile"),
+        sur_place("sur place");
 
-    public String toDatabaseValue() {
-        return this.name().replace('_', ' ');
+        private final String label;
+
+        TypePret(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public static TypePret fromLabel(String label) {
+            for (TypePret type : values()) {
+                if (type.label.equalsIgnoreCase(label)) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("No enum constant for label: " + label);
+        }
     }
-} 
+
+    @Converter(autoApply = true)
+    public static class TypePretConverter implements AttributeConverter<TypePret, String> {
+        @Override
+        public String convertToDatabaseColumn(TypePret attribute) {
+            return attribute != null ? attribute.getLabel() : null;
+        }
+
+        @Override
+        public TypePret convertToEntityAttribute(String dbData) {
+            if (dbData == null) return null;
+            return TypePret.fromLabel(dbData);
+        }
+    }
 }

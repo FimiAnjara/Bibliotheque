@@ -26,7 +26,7 @@
                         <form th:action="@{/personnel/pret/retour/{id}(id=${pret.id})}" method="post">
                             <div class="mb-3">
                                 <label for="dateRetour" class="form-label">Date de retour</label>
-                                <input type="date" class="form-control" id="dateRetour" name="dateRetour" required>
+                                <input type="datetime-local" class="form-control" id="dateRetour" name="dateRetour" required>
                             </div>
                             <div class="d-flex justify-content-between">
                                 <a th:href="@{/personnel/pret-non-rendu}" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i>Retour à la liste</a>

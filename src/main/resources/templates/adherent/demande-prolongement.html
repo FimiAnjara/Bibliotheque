@@ -6,7 +6,7 @@
     <link rel="stylesheet" th:href="@{/css/adherent.css}">  
 </head>
 <body>
-<div th:insert="~{fragments/adherent-navbar :: adherent-navbar}"></div>
+<div th:replace="fragments/adherent-navbar :: adherent-navbar(activePage='prets', notificationsNonLues=${notificationsNonLues}, user=${user})"></div>
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">

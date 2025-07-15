@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Prêts non rendus</title>
+    <title>Prêts déjà rendus</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/personnel.css}">
@@ -17,17 +17,10 @@
         <div class="col-md-9 col-lg-10 main-content">
             <div class="container mt-4">
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="fas fa-clock me-2"></i>Prêts non rendus</h4>
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-check me-2"></i>Prêts déjà rendus</h4>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <a th:href="@{/personnel/pret/rendu}" class="btn btn-outline-success btn-sm">
-                                <i class="fas fa-check"></i> Voir les prêts déjà rendus
-                            </a>
-                        </div>
-                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
                                 <thead class="table-light">
@@ -37,24 +30,20 @@
                                         <th>Type de prêt</th>
                                         <th>Date de prêt</th>
                                         <th>Date retour prévue</th>
-                                        <th>Actions</th>
+                                        <th>Date retour effective</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="pret : ${pretsNonRendus}">
+                                    <tr th:each="pret : ${pretsRendus}">
                                         <td th:text="${pret.adherent != null ? pret.adherent.numeroAdherent : ''}"></td>
                                         <td th:text="${pret.exemplaire != null ? pret.exemplaire.reference : ''}"></td>
                                         <td th:text="${pret.typePret}"></td>
                                         <td th:text="${#temporals.format(pret.datePret, 'dd/MM/yyyy')}"></td>
-                                        <td th:text="${dateRetourPrevueEffective[pret.id]}"></td>
-                                        <td>
-                                            <a th:href="@{/personnel/pret/retour/{id}(id=${pret.id})}" class="btn btn-success btn-sm">
-                                                <i class="fas fa-undo"></i> Rendre
-                                            </a>
-                                        </td>
+                                        <td th:text="${pret.dateRetourPrevu}"></td>
+                                        <td th:text="${pret.dateRetourEffectuer}"></td>
                                     </tr>
-                                    <tr th:if="${#lists.isEmpty(pretsNonRendus)}">
-                                        <td colspan="6" class="text-center text-muted">Aucun prêt en attente de retour.</td>
+                                    <tr th:if="${#lists.isEmpty(pretsRendus)}">
+                                        <td colspan="6" class="text-center text-muted">Aucun prêt rendu.</td>
                                     </tr>
                                 </tbody>
                             </table>

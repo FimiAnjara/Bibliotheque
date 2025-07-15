@@ -14,4 +14,5 @@ public interface PretRepository extends JpaRepository<Pret, Long> {
     List<Pret> findByAdherentAndDateRetourEffectuerIsNull(Adherent adherent);
     List<Pret> findByExemplaire(Exemplaire exemplaire);
     List<Pret> findByAdherentOrderByDatePretDesc(Adherent adherent);
+    List<Pret> findByDateRetourEffectuerIsNotNull();
 } 

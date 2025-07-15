@@ -15,7 +15,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${activePage} == 'livres' ? 'active'" href="/adherent/livres">
-                        <i class="fas fa-books me-1"></i>Livres
+                        <i class="fas fa-book me-1"></i>Livres
                     </a>
                 </li>
                 <li class="nav-item">
@@ -31,6 +31,11 @@
                               th:text="${notificationsNonLues}">
                             0
                         </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="/adherent/abonnement">
+                        <i class="fas fa-id-card me-1"></i>Abonnement
                     </a>
                 </li>
                 <li class="nav-item">

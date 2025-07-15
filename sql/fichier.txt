@@ -1,14 +1,13 @@
-est ce que je peux te demander de rediger le cachier de charge pour ce projet comme cela pour chaque fonctionnalite 
-1-	Fonctionnalité : emprunt livre
-a-	Acteur: Bibliothécaire
-b-	Entree : identifiant livre, identifiant adhérant, date d’emprunt et du date de rendu
-c-	Scenario : le bibliothécaire entre l’identifiant de l’adhérant, du date d’emprunt, du date de rendu et valide apres et si il y a une erreur il va afficher l’erreur et ne par permettre l’emprunt du livre par consequent jusqu’à correction de cette erreur
-d-	Règles de gestion :
-a.	Il faut que le livre soit disponible
-b.	Il faut que l’utilisateur a l’age minimum requis aussi pour lire le livre si une livre a une restriction d’age
-c.	 Il faut aussi qu’il ne dépasse pas le nombre de livre qu’il devrait emprunter
-d.	Ce sont seulement les adhérant qui peuvent emprunter un livre
-e-	Liste table : adherant, status_livre, bibliothécaire,  utilisateur, role
-f-	Temps  de développement :
-g-	Rendu visuel: Formulaire avec champs à remplir + bouton "Valider" + message d'erreur ou succès
-h-	Sous-tâche : create adherant, create livre, create bibliothecaire, create user pour le bibliothecaire, mettre en place une page login pour le bibliothecaire, create emprunt
+est ce que je peux te demander de rediger  dans un fichier cahier.txt le cahier de charge pour ce projet comme cela pour chaque fonctionnalite qu'on a implemente?
+1-	Fonctionnalité : pret livre
+	Acteur: Bibliothécaire
+	Entree : identifiant livre, identifiant adhérant, date d’emprunt et du date de rendu
+	Scenario : le bibliothécaire entre l’identifiant de l’adhérant, du date d’emprunt, du date de rendu et valide apres et si il y a une erreur il va afficher l’erreur et ne par permettre l’emprunt du livre par consequent jusqu’à correction de cette erreur
+	Règles de gestion :
+	Il faut que le livre soit disponible
+	Il faut que l’utilisateur a l’age minimum requis aussi pour lire le livre si une livre a une restriction d’age
+	 Il faut aussi qu’il ne dépasse pas le nombre de livre qu’il devrait emprunter
+	Ce sont seulement les adhérant qui peuvent emprunter un livre
+	Liste table : adherant, status_livre, bibliothécaire,  utilisateur, role
+	Rendu visuel: Formulaire avec champs à remplir + bouton "Valider" + message d'erreur ou succès
+    scenario alternative : retourne une affichage d'erreur si les regle de gestion ne sont pas respecter

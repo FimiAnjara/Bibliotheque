@@ -16,6 +16,9 @@ SELECT * FROM type_abonnement;
 
 SELECT * FROM validation;
 
+SELECT * FROM penalite;
+
+
 
 
 

@@ -1,0 +1,257 @@
+# CAHIER DES CHARGES - SYSTÈME DE GESTION DE BIBLIOTHÈQUE
+
+## 1. FONCTIONNALITÉ : PRÊT DE LIVRE
+**Acteur :** Bibliothécaire (Personnel)  
+**Entrée :** Identifiant exemplaire, identifiant adhérent, type de prêt, notes (optionnel)  
+**Scénario :** Le bibliothécaire sélectionne un exemplaire disponible, saisit l'identifiant de l'adhérent, choisit le type de prêt (Domicile/Sur place) et valide. Le système vérifie toutes les règles de gestion avant d'autoriser le prêt.  
+**Règles de gestion :**
+- L'exemplaire doit être disponible (statut = DISPONIBLE)
+- L'adhérent doit avoir un abonnement valide à la date du prêt
+- L'adhérent ne doit pas avoir de pénalité active
+- Pour les prêts "Domicile" : l'adhérent ne doit pas dépasser son quota de prêts
+- Les prêts "Sur place" ne comptent pas dans le quota
+- Seuls les adhérents peuvent emprunter des livres
+
+**Liste des tables :** pret, adherent, exemplaire, statut_exemplaire, personnel, utilisateur, abonnement, penalite, configuration_quota  
+**Rendu visuel :** Formulaire avec sélection d'exemplaire, saisie ID adhérent, choix type prêt + bouton "Valider" + messages d'erreur/succès  
+**Scénario alternatif :** Affichage d'erreur si les règles de gestion ne sont pas respectées
+
+---
+
+## 2. FONCTIONNALITÉ : RETOUR DE LIVRE
+**Acteur :** Bibliothécaire (Personnel)  
+**Entrée :** Identifiant du prêt  
+**Scénario :** Le bibliothécaire sélectionne un prêt non rendu, confirme le retour et le système enregistre la date de retour effective.  
+**Règles de gestion :**
+- Le prêt doit être en cours (date_retour_effectuer = null)
+- Si le retour est en retard, une pénalité automatique est appliquée
+- Le statut de l'exemplaire redevient DISPONIBLE
+
+**Liste des tables :** pret, exemplaire, statut_exemplaire, penalite, type_penalite  
+**Rendu visuel :** Liste des prêts non rendus + bouton "Enregistrer retour" + confirmation  
+**Scénario alternatif :** Application automatique de pénalité en cas de retard
+
+---
+
+## 3. FONCTIONNALITÉ : GESTION DES ADHÉRENTS
+**Acteur :** Bibliothécaire (Personnel)  
+**Entrée :** Informations adhérent (nom, prénom, email, profil, etc.)  
+**Scénario :** Le bibliothécaire peut consulter, ajouter, modifier les informations des adhérents.  
+**Règles de gestion :**
+- Chaque adhérent doit avoir un profil associé
+- L'email doit être unique
+- Un adhérent peut avoir plusieurs abonnements
+
+**Liste des tables :** adherent, utilisateur, profil, abonnement  
+**Rendu visuel :** Liste des adhérents + formulaires d'ajout/modification  
+**Scénario alternatif :** Validation des données avant sauvegarde
+
+---
+
+## 4. FONCTIONNALITÉ : GESTION DES LIVRES
+**Acteur :** Bibliothécaire (Personnel)  
+**Entrée :** Informations livre (titre, auteur, éditeur, catégories, etc.)  
+**Scénario :** Le bibliothécaire peut ajouter, modifier, supprimer des livres et leurs exemplaires.  
+**Règles de gestion :**
+- Un livre peut avoir plusieurs auteurs
+- Un livre peut appartenir à plusieurs catégories
+- Chaque exemplaire a une référence unique
+
+**Liste des tables :** livre, auteur, editeur, categorie, exemplaire, livre_categorie  
+**Rendu visuel :** Liste des livres + formulaires de gestion  
+**Scénario alternatif :** Vérification des références uniques
+
+---
+
+## 5. FONCTIONNALITÉ : GESTION DES ABONNEMENTS
+**Acteur :** Adhérent  
+**Entrée :** Type d'abonnement, montant, date de paiement  
+**Scénario :** L'adhérent peut souscrire à un abonnement en choisissant le type et en payant le montant correspondant.  
+**Règles de gestion :**
+- L'abonnement est valide de la date de paiement à la date de fin calculée
+- Sans abonnement valide, l'adhérent ne peut ni emprunter ni réserver
+- La durée dépend du type d'abonnement choisi
+
+**Liste des tables :** abonnement, type_abonnement, adherent  
+**Rendu visuel :** Formulaire de souscription avec choix du type + paiement  
+**Scénario alternatif :** Refus si l'adhérent a déjà un abonnement valide
+
+---
+
+## 6. FONCTIONNALITÉ : RÉSERVATION DE LIVRES
+**Acteur :** Adhérent  
+**Entrée :** Exemplaire, date souhaitée  
+**Scénario :** L'adhérent peut réserver un exemplaire pour une date future.  
+**Règles de gestion :**
+- L'adhérent doit avoir un abonnement valide
+- Pas de conflit de dates avec d'autres prêts
+- La réservation expire après 7 jours si non validée
+- Respect du quota de réservations
+
+**Liste des tables :** reservation, adherent, exemplaire, abonnement  
+**Rendu visuel :** Formulaire de réservation + liste des réservations  
+**Scénario alternatif :** Refus si l'exemplaire n'est pas disponible à la date souhaitée
+
+---
+
+## 7. FONCTIONNALITÉ : VALIDATION DES RÉSERVATIONS
+**Acteur :** Bibliothécaire (Personnel)  
+**Entrée :** Identifiant de la réservation  
+**Scénario :** Le bibliothécaire valide une réservation, ce qui crée automatiquement un prêt.  
+**Règles de gestion :**
+- Vérification de la validité de l'abonnement
+- Vérification des conflits de dates
+- Respect du quota de prêts
+- Création automatique d'un prêt "Domicile"
+
+**Liste des tables :** reservation, pret, validation, adherent  
+**Rendu visuel :** Liste des réservations en attente + bouton "Valider"  
+**Scénario alternatif :** Refus si les conditions ne sont pas remplies
+
+---
+
+## 8. FONCTIONNALITÉ : GESTION DES PÉNALITÉS
+**Acteur :** Bibliothécaire (Personnel)  
+**Entrée :** Type de pénalité, durée, adhérent  
+**Scénario :** Le système applique automatiquement des pénalités en cas de retard, ou le bibliothécaire peut en créer manuellement.  
+**Règles de gestion :**
+- Pénalités automatiques lors des retours en retard
+- Durée de pénalité selon le type et le nombre de jours de retard
+- Pendant une pénalité, l'adhérent ne peut ni emprunter ni réserver
+
+**Liste des tables :** penalite, type_penalite, adherent, pret  
+**Rendu visuel :** Liste des pénalités + formulaires de gestion  
+**Scénario alternatif :** Application automatique selon les règles définies
+
+---
+
+## 9. FONCTIONNALITÉ : PROLONGEMENT DE PRÊT
+**Acteur :** Adhérent  
+**Entrée :** Identifiant du prêt  
+**Scénario :** L'adhérent peut demander une prolongation de son prêt.  
+**Règles de gestion :**
+- Pas de prolongement si l'adhérent a une pénalité
+- Pas de prolongement si l'exemplaire est réservé
+- La prolongation doit être validée par un bibliothécaire
+
+**Liste des tables :** prolongement_pret, pret, validation, adherent  
+**Rendu visuel :** Formulaire de demande + liste des demandes  
+**Scénario alternatif :** Refus si les conditions ne sont pas remplies
+
+---
+
+## 10. FONCTIONNALITÉ : NOTIFICATIONS
+**Acteur :** Système automatique  
+**Entrée :** Événements système (retour en retard, validation réservation, etc.)  
+**Scénario :** Le système génère automatiquement des notifications pour informer les utilisateurs.  
+**Règles de gestion :**
+- Notifications pour retours en retard
+- Notifications pour validations de réservations
+- Notifications pour expirations d'abonnements
+
+**Liste des tables :** notification, utilisateur, pret, reservation  
+**Rendu visuel :** Centre de notifications dans l'interface utilisateur  
+**Scénario alternatif :** Marquage des notifications comme lues
+
+---
+
+## 11. FONCTIONNALITÉ : GESTION DES STATUTS D'EXEMPLAIRES
+**Acteur :** Bibliothécaire (Personnel)  
+**Entrée :** Nouveau statut, exemplaire, raison  
+**Scénario :** Le bibliothécaire peut changer le statut d'un exemplaire (Disponible, Emprunté, En réparation, etc.).  
+**Règles de gestion :**
+- Historique des changements de statut
+- Statut automatique lors des prêts/retours
+- Statut manuel pour réparations, pertes, etc.
+
+**Liste des tables :** statut_exemplaire, exemplaire, personnel  
+**Rendu visuel :** Interface de changement de statut + historique  
+**Scénario alternatif :** Validation des changements de statut
+
+---
+
+## 12. FONCTIONNALITÉ : CONFIGURATION DES QUOTAS
+**Acteur :** Administrateur  
+**Entrée :** Profil, quota prêts, quota réservations, durée max prêt  
+**Scénario :** L'administrateur configure les quotas et durées selon les profils d'adhérents.  
+**Règles de gestion :**
+- Quotas différents selon les profils
+- Durées de prêt configurables
+- Application automatique des quotas
+
+**Liste des tables :** configuration_quota, profil  
+**Rendu visuel :** Interface de configuration des quotas  
+**Scénario alternatif :** Validation des configurations
+
+---
+
+## 13. FONCTIONNALITÉ : AUTHENTIFICATION ET AUTORISATION
+**Acteur :** Tous les utilisateurs  
+**Entrée :** Identifiants de connexion  
+**Scénario :** Les utilisateurs se connectent avec leurs identifiants et accèdent aux fonctionnalités selon leur rôle.  
+**Règles de gestion :**
+- Rôles : Adhérent, Personnel, Administrateur
+- Sessions sécurisées
+- Accès différencié selon les rôles
+
+**Liste des tables :** utilisateur, profil, session  
+**Rendu visuel :** Page de connexion + interfaces adaptées aux rôles  
+**Scénario alternatif :** Redirection vers connexion si non authentifié
+
+---
+
+## 14. FONCTIONNALITÉ : GESTION DES CATÉGORIES ET ÉDITEURS
+**Acteur :** Bibliothécaire (Personnel)  
+**Entrée :** Informations catégorie/éditeur  
+**Scénario :** Le bibliothécaire peut gérer les catégories de livres et les éditeurs.  
+**Règles de gestion :**
+- Catégories hiérarchiques possibles
+- Éditeurs uniques
+- Association multiple livre-catégorie
+
+**Liste des tables :** categorie, editeur, livre_categorie  
+**Rendu visuel :** Interfaces de gestion des catégories et éditeurs  
+**Scénario alternatif :** Validation des données avant sauvegarde
+
+---
+
+## 15. FONCTIONNALITÉ : RECHERCHE ET FILTRAGE
+**Acteur :** Tous les utilisateurs  
+**Entrée :** Critères de recherche  
+**Scénario :** Les utilisateurs peuvent rechercher des livres selon différents critères.  
+**Règles de gestion :**
+- Recherche par titre, auteur, catégorie
+- Filtrage par disponibilité
+- Tri par différents critères
+
+**Liste des tables :** livre, auteur, categorie, exemplaire  
+**Rendu visuel :** Interface de recherche avec filtres  
+**Scénario alternatif :** Résultats paginés pour de grandes listes
+
+---
+
+## RÈGLES GÉNÉRALES DU SYSTÈME
+
+### Contraintes techniques :
+- Application web Spring Boot avec Thymeleaf
+- Base de données PostgreSQL
+- Interface responsive Bootstrap
+- Gestion des sessions utilisateur
+
+### Sécurité :
+- Authentification obligatoire
+- Autorisation basée sur les rôles
+- Validation des données côté serveur
+- Protection contre les injections SQL
+
+### Performance :
+- Pagination des listes
+- Indexation de la base de données
+- Mise en cache des données fréquentes
+- Optimisation des requêtes
+
+### Maintenance :
+- Logs des actions importantes
+- Sauvegarde automatique de la base
+- Gestion des erreurs et exceptions
+- Documentation du code 

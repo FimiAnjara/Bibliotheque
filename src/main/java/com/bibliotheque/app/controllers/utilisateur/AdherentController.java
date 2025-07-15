@@ -478,6 +478,9 @@ public String notifications(Model model, HttpSession session) {
             return "redirect:/";
         }
         List<TypeAbonnement> types = typeAbonnementService.findAll();
+        long notificationsNonLues = notificationService.countByUtilisateurAndEstLuFalse(user);
+        model.addAttribute("user", user);
+        model.addAttribute("notificationsNonLues", notificationsNonLues);
         model.addAttribute("typesAbonnement", types);
         model.addAttribute("abonnement", new Abonnement());
         return "adherent/abonnement";

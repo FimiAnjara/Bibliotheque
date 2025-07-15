@@ -12,7 +12,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
@@ -33,16 +32,16 @@ public class ExemplaireController {
 
     @Autowired
     private LivreService livreService;
-    
+
     @Autowired
     private StatutExemplaireService statutExemplaireService;
-    
+
     @Autowired
     private PersonnelService personnelService;
 
     @Autowired
     private PretService pretService;
-    
+
     @Autowired
     private AdherentService adherentService;
 
@@ -58,21 +57,23 @@ public class ExemplaireController {
 
     @PostMapping("/add")
     public String addExemplaire(@ModelAttribute Exemplaire exemplaire,
-                               @RequestParam Long livreId,
-                               HttpSession session,
-                               RedirectAttributes redirectAttributes) {
+            @RequestParam Long livreId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
         try {
             Livre livre = livreService.findById(livreId);
-            if (livre != null) exemplaire.setLivre(livre);
-            
-            com.bibliotheque.app.models.utilisateur.Utilisateur user = 
-                (com.bibliotheque.app.models.utilisateur.Utilisateur) session.getAttribute("user");
-            
+            if (livre != null)
+                exemplaire.setLivre(livre);
+
+            com.bibliotheque.app.models.utilisateur.Utilisateur user = (com.bibliotheque.app.models.utilisateur.Utilisateur) session
+                    .getAttribute("user");
+
             if (user != null) {
                 Personnel personnel = personnelService.findById(user.getId());
                 if (personnel != null) {
                     exemplaireService.saveWithDefaultStatus(exemplaire, personnel);
-                    redirectAttributes.addFlashAttribute("success", "Exemplaire ajouté avec succès ! Statut initial : Disponible");
+                    redirectAttributes.addFlashAttribute("success",
+                            "Exemplaire ajouté avec succès ! Statut initial : Disponible");
                 } else {
                     exemplaireService.save(exemplaire);
                     redirectAttributes.addFlashAttribute("success", "Exemplaire ajouté avec succès !");
@@ -86,73 +87,76 @@ public class ExemplaireController {
         }
         return "redirect:/personnel/exemplaire/add";
     }
-    
+
     @GetMapping("/list")
     public String listExemplaires(@RequestParam(required = false) String search,
-                                 @RequestParam(required = false) String livre,
-                                 @RequestParam(required = false) String reference,
-                                 @RequestParam(required = false) Integer statut,
-                                 Model model) {
+            @RequestParam(required = false) String livre,
+            @RequestParam(required = false) String reference,
+            @RequestParam(required = false) Integer statut,
+            Model model) {
         List<Exemplaire> exemplaires = exemplaireService.findAll();
 
         if (search != null && !search.trim().isEmpty()) {
             String searchLower = search.toLowerCase();
             exemplaires = exemplaires.stream()
-                .filter(ex -> (ex.getReference() != null && ex.getReference().toLowerCase().contains(searchLower)) ||
-                             (ex.getLivre() != null && ex.getLivre().getTitre() != null && 
-                              ex.getLivre().getTitre().toLowerCase().contains(searchLower)) ||
-                             (ex.getLivre() != null && ex.getLivre().getAuteur() != null && 
-                              ((ex.getLivre().getAuteur().getNom() != null && 
-                                ex.getLivre().getAuteur().getNom().toLowerCase().contains(searchLower)) ||
-                               (ex.getLivre().getAuteur().getPrenom() != null && 
-                                ex.getLivre().getAuteur().getPrenom().toLowerCase().contains(searchLower)))))
-                .collect(Collectors.toList());
+                    .filter(ex -> (ex.getReference() != null && ex.getReference().toLowerCase().contains(searchLower))
+                            ||
+                            (ex.getLivre() != null && ex.getLivre().getTitre() != null &&
+                                    ex.getLivre().getTitre().toLowerCase().contains(searchLower))
+                            ||
+                            (ex.getLivre() != null && ex.getLivre().getAuteur() != null &&
+                                    ((ex.getLivre().getAuteur().getNom() != null &&
+                                            ex.getLivre().getAuteur().getNom().toLowerCase().contains(searchLower)) ||
+                                            (ex.getLivre().getAuteur().getPrenom() != null &&
+                                                    ex.getLivre().getAuteur().getPrenom().toLowerCase()
+                                                            .contains(searchLower)))))
+                    .collect(Collectors.toList());
         }
-        
+
         if (livre != null && !livre.trim().isEmpty()) {
             String livreLower = livre.toLowerCase();
             exemplaires = exemplaires.stream()
-                .filter(ex -> ex.getLivre() != null && ex.getLivre().getTitre() != null && 
-                             ex.getLivre().getTitre().toLowerCase().contains(livreLower))
-                .collect(Collectors.toList());
+                    .filter(ex -> ex.getLivre() != null && ex.getLivre().getTitre() != null &&
+                            ex.getLivre().getTitre().toLowerCase().contains(livreLower))
+                    .collect(Collectors.toList());
         }
-        
+
         if (reference != null && !reference.trim().isEmpty()) {
             String referenceLower = reference.toLowerCase();
             exemplaires = exemplaires.stream()
-                .filter(ex -> ex.getReference() != null && ex.getReference().toLowerCase().contains(referenceLower))
-                .collect(Collectors.toList());
+                    .filter(ex -> ex.getReference() != null && ex.getReference().toLowerCase().contains(referenceLower))
+                    .collect(Collectors.toList());
         }
-        
+
         if (statut != null) {
             exemplaires = exemplaires.stream()
-                .filter(ex -> statutExemplaireService.getCurrentStatut(ex).getCode() == statut)
-                .collect(Collectors.toList());
+                    .filter(ex -> statutExemplaireService.getCurrentStatut(ex).getCode() == statut)
+                    .collect(Collectors.toList());
         }
-        
+
         Map<Long, StatutExemplaire.Statut> statutsActuels = exemplaires.stream()
-            .collect(Collectors.toMap(
-                Exemplaire::getId,
-                exemplaire -> statutExemplaireService.getCurrentStatut(exemplaire)
-            ));
-        
+                .collect(Collectors.toMap(
+                        Exemplaire::getId,
+                        exemplaire -> statutExemplaireService.getCurrentStatut(exemplaire)));
+
         model.addAttribute("activePage", "exemplaire");
         model.addAttribute("activeSubPage", "exemplaire-list");
         model.addAttribute("exemplaires", exemplaires);
         model.addAttribute("statutsActuels", statutsActuels);
         model.addAttribute("statuts", StatutExemplaire.Statut.values());
-        
+
         model.addAttribute("search", search);
         model.addAttribute("livre", livre);
         model.addAttribute("reference", reference);
         model.addAttribute("statut", statut);
-        
+
         return "personnel/exemplaire/list";
     }
 
     @GetMapping("/preter/{exemplaireId}")
     public String showPretForm(@PathVariable Long exemplaireId, Model model, HttpSession session) {
-        com.bibliotheque.app.models.utilisateur.Utilisateur user = (com.bibliotheque.app.models.utilisateur.Utilisateur) session.getAttribute("user");
+        com.bibliotheque.app.models.utilisateur.Utilisateur user = (com.bibliotheque.app.models.utilisateur.Utilisateur) session
+                .getAttribute("user");
         if (user == null) {
             return "redirect:/";
         }
@@ -171,12 +175,13 @@ public class ExemplaireController {
 
     @PostMapping("/preter/{exemplaireId}")
     public String effectuerPret(@PathVariable Long exemplaireId,
-                                @RequestParam Long adherentId,
-                                @RequestParam(required = false) String notes,
-                                @RequestParam(defaultValue = "Domicile") String typePret,
-                                HttpSession session,
-                                RedirectAttributes redirectAttributes) {
-        com.bibliotheque.app.models.utilisateur.Utilisateur user = (com.bibliotheque.app.models.utilisateur.Utilisateur) session.getAttribute("user");
+            @RequestParam Long adherentId,
+            @RequestParam(required = false) String notes,
+            @RequestParam(defaultValue = "Domicile") String typePret,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        com.bibliotheque.app.models.utilisateur.Utilisateur user = (com.bibliotheque.app.models.utilisateur.Utilisateur) session
+                .getAttribute("user");
         if (user == null) {
             redirectAttributes.addFlashAttribute("error", "Utilisateur non connecté");
             return "redirect:/personnel/exemplaire/list";
@@ -196,13 +201,16 @@ public class ExemplaireController {
             return "redirect:/personnel/exemplaire/list";
         }
         Pret pret = new Pret();
-        pret.setAdherent(adherent);
-        pret.setExemplaire(exemplaire);
-        pret.setDatePret(java.time.LocalDateTime.now());
-        pret.setTypePret(Pret.TypePret.valueOf(typePret));
-        pret.setNotes(notes);
-        pret.setDateRetourPrevu(pretService.getDateRetourPrevue(pret.getDatePret(), adherent));
+
         try {
+            pret.setAdherent(adherent);
+            pret.setExemplaire(exemplaire);
+            pret.setDatePret(java.time.LocalDateTime.now());
+            pret.setNotes(notes);
+            pret.setDateRetourPrevu(typePret.equals("sur place") 
+                ? pretService.getDateRetourPrevueSurPlace(pret.getDatePret())
+                : pretService.getDateRetourPrevue(pret.getDatePret(), adherent));
+            pret.setTypePret(Pret.TypePret.fromLabel(typePret));
             pretService.saveWithChecks(pret);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -219,4 +227,4 @@ public class ExemplaireController {
         redirectAttributes.addFlashAttribute("success", "Prêt effectué avec succès !");
         return "redirect:/personnel/exemplaire/list";
     }
-} 
+}

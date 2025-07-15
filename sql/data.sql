@@ -150,3 +150,9 @@ INSERT INTO notification (utilisateur_id, message, date_creation, est_lu, pret_i
 -- Notification lue pour Alice
 (1, 'Rappel : Votre livre "Harry Potter à l''école des sorciers" doit être retourné avant le 19/02/2024.', '2024-01-20 09:00:00', true, 1, NULL);
 
+INSERT INTO type_abonnement (code, libelle, duree_mois, montant, conditions) VALUES
+('BASIC',    'Abonnement Basique',    6,  20.00, 'Accès aux livres papier'),
+('PREMIUM',  'Abonnement Premium',   12,  35.00, 'Accès livres papier + numériques'),
+('ETUDIANT', 'Abonnement Étudiant',  12,  15.00, 'Sur justificatif étudiant'),
+('FAMILLE',  'Abonnement Famille',   12,  50.00, 'Jusqu''à 4 membres d''une famille'),
+('MENSUEL',  'Abonnement Mensuel',    1,   5.00, 'Renouvelable chaque mois');
